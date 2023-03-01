@@ -1,0 +1,84 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://YOMIRecord/ui/screenshot.png" type="Texture" id=1]
+[ext_resource path="res://YOMIRecord/ui/resetplayback.png" type="Texture" id=2]
+[ext_resource path="res://YOMIRecord/ui/ExtraReplayOptions.gd" type="Script" id=3]
+[ext_resource path="res://YOMIRecord/ui/record.png" type="Texture" id=4]
+[ext_resource path="res://YOMIRecord/ui/settings.png" type="Texture" id=5]
+
+[sub_resource type="InputEventAction" id=3]
+action = "frame_advance"
+pressed = true
+
+[sub_resource type="ShortCut" id=4]
+shortcut = SubResource( 3 )
+
+[node name="YOMIRecordPlaybackOptions" type="HBoxContainer"]
+margin_top = 13.0
+margin_right = 169.0
+margin_bottom = 33.0
+rect_pivot_offset = Vector2( -160, -40 )
+script = ExtResource( 3 )
+
+[node name="PlaybackReset" type="Button" parent="."]
+unique_name_in_owner = true
+margin_right = 24.0
+margin_bottom = 20.0
+hint_tooltip = "Restart the replay"
+shortcut_in_tooltip = false
+action_mode = 0
+shortcut = SubResource( 4 )
+icon = ExtResource( 2 )
+
+[node name="Control" type="Control" parent="."]
+margin_left = 28.0
+margin_right = 28.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="ScreenshotFrame" type="Button" parent="."]
+unique_name_in_owner = true
+margin_left = 32.0
+margin_right = 131.0
+margin_bottom = 20.0
+hint_tooltip = "Screenshot this frame"
+shortcut_in_tooltip = false
+action_mode = 0
+shortcut = SubResource( 4 )
+text = "Screenshot"
+icon = ExtResource( 1 )
+
+[node name="Control2" type="Control" parent="."]
+margin_left = 135.0
+margin_right = 135.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="RecordPlayback" type="Button" parent="."]
+unique_name_in_owner = true
+margin_left = 139.0
+margin_right = 209.0
+margin_bottom = 20.0
+hint_tooltip = "Record this replay"
+shortcut_in_tooltip = false
+action_mode = 0
+shortcut = SubResource( 4 )
+text = "Record"
+icon = ExtResource( 4 )
+
+[node name="Control3" type="Control" parent="."]
+margin_left = 213.0
+margin_right = 213.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="YOMIRecordOptions" type="Button" parent="."]
+unique_name_in_owner = true
+margin_left = 217.0
+margin_right = 241.0
+margin_bottom = 20.0
+hint_tooltip = "Open Your Only Move Is Record Options"
+shortcut_in_tooltip = false
+action_mode = 0
+shortcut = SubResource( 4 )
+icon = ExtResource( 5 )

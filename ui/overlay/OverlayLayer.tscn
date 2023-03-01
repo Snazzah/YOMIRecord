@@ -1,0 +1,153 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://theme.tres" type="Theme" id=1]
+[ext_resource path="res://ui/default_font.tres" type="DynamicFont" id=2]
+[ext_resource path="res://sound/ui/chat.wav" type="AudioStream" id=3]
+[ext_resource path="res://YOMIRecord/ui/overlay/rendering.png" type="Texture" id=4]
+[ext_resource path="res://sound/common/quitter_alarm.wav" type="AudioStream" id=5]
+
+[node name="YOMIRecordLayer" type="CanvasLayer"]
+
+[node name="Overlay" type="Control" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme = ExtResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Toasts" type="MarginContainer" parent="Overlay"]
+margin_left = 58.0
+margin_top = 23.0
+margin_right = 582.0
+margin_bottom = 321.0
+mouse_filter = 2
+
+[node name="ToastContainer" type="VBoxContainer" parent="Overlay/Toasts"]
+margin_right = 524.0
+margin_bottom = 298.0
+mouse_filter = 2
+input_pass_on_modal_close_click = false
+alignment = 2
+
+[node name="ToastSound" type="AudioStreamPlayer2D" parent="Overlay/Toasts"]
+position = Vector2( -116, -186 )
+stream = ExtResource( 3 )
+volume_db = -8.0
+bus = "UI"
+
+[node name="ToastAlertSound" type="AudioStreamPlayer2D" parent="Overlay/Toasts"]
+position = Vector2( -116, -186 )
+stream = ExtResource( 5 )
+volume_db = -8.0
+bus = "UI"
+
+[node name="RenderingOverlay" type="MarginContainer" parent="Overlay"]
+visible = false
+anchor_left = 0.4
+anchor_top = 0.4
+anchor_right = 0.6
+anchor_bottom = 0.6
+margin_left = -262.0
+margin_top = -157.0
+margin_right = 262.0
+margin_bottom = 141.0
+
+[node name="ColorRect" type="ColorRect" parent="Overlay/RenderingOverlay"]
+margin_right = 652.0
+margin_bottom = 370.0
+color = Color( 0, 0, 0, 0.784314 )
+
+[node name="HContainer" type="VBoxContainer" parent="Overlay/RenderingOverlay"]
+margin_right = 652.0
+margin_bottom = 370.0
+mouse_filter = 2
+input_pass_on_modal_close_click = false
+alignment = 1
+
+[node name="Spacer" type="Label" parent="Overlay/RenderingOverlay/HContainer"]
+margin_top = 85.0
+margin_right = 652.0
+margin_bottom = 138.0
+size_flags_vertical = 1
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+text = "
+
+
+"
+align = 1
+valign = 1
+
+[node name="TitleImage" type="TextureRect" parent="Overlay/RenderingOverlay/HContainer"]
+margin_top = 139.0
+margin_right = 652.0
+margin_bottom = 139.0
+size_flags_vertical = 8
+texture = ExtResource( 4 )
+expand = true
+stretch_mode = 4
+
+[node name="Label3" type="Label" parent="Overlay/RenderingOverlay/HContainer"]
+visible = false
+margin_top = 140.0
+margin_right = 652.0
+margin_bottom = 151.0
+size_flags_vertical = 1
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+text = "RENDERING"
+align = 1
+valign = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Overlay/RenderingOverlay/HContainer"]
+margin_top = 140.0
+margin_right = 652.0
+margin_bottom = 260.0
+size_flags_vertical = 4
+custom_colors/default_color = Color( 0.666667, 0.666667, 0.666667, 1 )
+custom_fonts/mono_font = ExtResource( 2 )
+bbcode_enabled = true
+bbcode_text = "
+
+
+
+[center]Your recording is now being rendered with FFmpeg.
+[color=#3498db]Be patient![/color] This will take time and [u]the game may temporarily stop responding for a bit.[/u]
+
+Renders usually go for around 20-30 frames per second. (Check the ETA below)
+In the meantime,[color=#ddd] don't mess with the game please.[/color][/center]
+"
+meta_underlined = false
+text = "
+
+
+
+Your recording is now being rendered with FFmpeg.
+Be patient! This will take time and the game may temporarily stop responding for a bit.
+
+Renders usually go for around 20-40 frames per second. (Check the ETA below)
+In the meantime, don't mess with the game please.
+"
+fit_content_height = true
+scroll_active = false
+
+[node name="FrameWarn" type="Label" parent="Overlay/RenderingOverlay/HContainer"]
+margin_top = 261.0
+margin_right = 652.0
+margin_bottom = 272.0
+size_flags_vertical = 1
+custom_colors/font_color = Color( 0.509804, 0.282353, 0.282353, 1 )
+text = "If you are experiencing problems, turn on \"Pause Between Writing Frames\" in the options."
+align = 1
+valign = 1
+
+[node name="Detail" type="Label" parent="Overlay/RenderingOverlay/HContainer"]
+margin_top = 273.0
+margin_right = 652.0
+margin_bottom = 284.0
+size_flags_vertical = 1
+custom_colors/font_color = Color( 0.423529, 0.423529, 0.423529, 1 )
+text = "Rendering XX frames..."
+align = 1
+valign = 1

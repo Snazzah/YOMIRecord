@@ -1,0 +1,15 @@
+{
+  "author": "Snazzah",
+  "client_side": true,
+  "description": "Screenshot and record replays",
+  "friendly_name": "Your Only Move Is Record",
+  "id": "12345",
+  "link": "",
+  "name": "YOMIRecord",
+  "overwrites": false,
+  "priority": 0,
+  "requires": [
+    ""
+  ],
+  "version": "1.1.0"
+}
