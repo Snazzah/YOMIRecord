@@ -7,7 +7,7 @@
   "link": "",
   "name": "YOMIRecord",
   "overwrites": false,
-  "priority": 0,
+  "priority": -9000,
   "requires": [
     ""
   ],
