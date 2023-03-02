@@ -26,7 +26,7 @@ func _yomirecord_add_to_main():
 	# Overlay Layer
 	var overlay = load("res://YOMIRecord/ui/overlay/OverlayLayer.tscn").instance()
 	var uilayer = main.get_node("UILayer")
-	main.add_child_below_node(uilayer, overlay, true)
+	main.add_child(overlay)
 	overlay.set_owner(main)
 
 	# Pause Buttons

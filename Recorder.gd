@@ -32,7 +32,6 @@ onready var ffmpeg = get_tree().get_root().get_node("ModLoader/YOMIRecord/FFmpeg
 #       quality slider for 1MB instead
 # BUGS
 #  - fix resetting in between the P1 WIN screen (and not making tt stay there for the whole recording)
-#  - post processing mod sets our layer below UI
 
 func _ready():
 	name = "YOMIRecorder"
