@@ -51,7 +51,6 @@ func generate_timed_name():
 # I can use self_modulate to make it invisible
 func set_ui_visibility(visible = false):
 	var uilayer = get_tree().get_root().get_node("Main/UILayer")
-	var replay_controls = uilayer.get_node("ReplayControls")
 	var to_self_modulate = [
 		uilayer.get_node("GameUI/TopInfo"),
 		uilayer.get_node("GameUI/TopInfoMP"),
@@ -63,12 +62,18 @@ func set_ui_visibility(visible = false):
 		uilayer.get_node("P1TurnTimerBar"),
 		uilayer.get_node("P1TurnTimerLabel"),
 		uilayer.get_node("P2TurnTimerBar"),
-		uilayer.get_node("P2TurnTimerLabel")
+		uilayer.get_node("P2TurnTimerLabel"),
+		uilayer.get_node("OpponentDisconnectedLabel")
 	]
 	var to_modulate = [
 		uilayer.get_node("GameUI/PausePanel"),
 		uilayer.get_node("YOMIRecordOptionsWindow"),
-		uilayer.get_node("ResimRequestScreen")
+		uilayer.get_node("ResimRequestScreen"),
+		uilayer.get_node("ChatWindow"),
+		uilayer.get_node("PostGameButtons"),
+		uilayer.get_node("NagWindow"),
+		uilayer.get_node("ReplayControls"),
+		get_tree().get_root().get_node("Main/HudLayer/HudLayer/HboxContainer") # Show style buttons
 	]
 
 	if options.get_option("hide_supermeter"):
@@ -76,13 +81,11 @@ func set_ui_visibility(visible = false):
 		to_modulate.append(uilayer.get_node("GameUI/BottomBar/ActionButtons/VBoxContainer2/P2InfoContainer"))
 
 	if not visible:
-		replay_controls.visible = false
 		for node in to_modulate:
 			if node: node.modulate.a = 0
 		for node in to_self_modulate:
 			if node: node.self_modulate.a = 0
 	else:
-#		replay_controls.visible = not Network.multiplayer_active and Global.show_playback_controls
 		for node in to_modulate:
 			if node: node.modulate.a = 1
 		for node in to_self_modulate:
