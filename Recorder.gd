@@ -152,21 +152,24 @@ func screenshot():
 	set_ui_visibility(true)
 	set_yomirecord_overlay_visible(true)
 
-func parse_char_name(char_name):
+func parse_char_name(char_name: String):
 	# Fix modded character names
 	if char_name.find("F-") == 0 and char_name.find("__") != -1:
-		return char_name.split("__")[1]
+		var name_split: PoolStringArray = char_name.split("__")
+		if name_split[0].length() == 34 and name_split[1]:
+			return name_split[1]
+
 	return char_name
 
 func get_player_names():
-	var p1name = parse_char_name(Global.current_game.match_data.selected_characters[1].name)
-	var p2name = parse_char_name(Global.current_game.match_data.selected_characters[2].name)
+	var p1name = Global.current_game.match_data.selected_characters[1].name
+	var p2name = Global.current_game.match_data.selected_characters[2].name
 	if Global.current_game.match_data.has("user_data"):
 		if Global.current_game.match_data.user_data.has("p1") and Global.current_game.match_data.user_data.p1 != "":
 			p1name = Global.current_game.match_data.user_data.p1
 		if Global.current_game.match_data.user_data.has("p2") and Global.current_game.match_data.user_data.p2 != "":
 			p2name = Global.current_game.match_data.user_data.p2
-	return [p1name, p2name]
+	return [parse_char_name(p1name), parse_char_name(p2name)]
 
 func get_native_speed():
 	if not options.get_option("native_speed"): return null
