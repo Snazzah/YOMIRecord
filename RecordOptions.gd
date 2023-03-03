@@ -129,6 +129,7 @@ func refresh_options():
 	if refreshing_opts: return
 	refreshing_opts = true
 	$"%HideHUDToggle".set_pressed_no_signal(options.get_option("hide_hud"))
+	$"%HideSupermeterToggle".set_pressed_no_signal(options.get_option("hide_supermeter"))
 
 	var resolution = "%dp" % options.get_option("resolution")
 	$"%Resolution".selected = -1
