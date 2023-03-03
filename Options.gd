@@ -6,6 +6,7 @@ var default_options = {
 	"resolution": 720,
 	"hide_hud": false,
 	"hide_supermeter": false,
+	"hide_chat": true,
 	"use_steam_overlay": false,
 	"recording_format": "mp4",
 	"speed": 1.0,

@@ -29,6 +29,8 @@ func _ready():
 	# Hook Options
 	$"%Resolution".connect("item_selected", self, "_on_option_select", ["resolution", $"%Resolution"])
 	$"%HideHUDToggle".connect("toggled", self, "_on_checkbox_toggle", ["hide_hud"])
+	$"%HideSupermeterToggle".connect("toggled", self, "_on_checkbox_toggle", ["hide_supermeter"])
+	$"%HideChatToggle".connect("toggled", self, "_on_checkbox_toggle", ["hide_chat"])
 	$"%SteamOverlayToggle".connect("toggled", self, "_on_checkbox_toggle", ["use_steam_overlay"])
 	$"%Format".connect("item_selected", self, "_on_option_select", ["recording_format", $"%Format"])
 	$"%Volume".connect("value_changed", self, "_on_range_change", ["volume", $"%Volume", true])
@@ -40,7 +42,6 @@ func _ready():
 	$"%SkipFilesToggle".connect("toggled", self, "_on_checkbox_toggle", ["skip_files"])
 	$"%ExecWindowToggle".connect("toggled", self, "_on_checkbox_toggle", ["exec_console"])
 	$"%PauseBetweenFramesToggle".connect("toggled", self, "_on_checkbox_toggle", ["pause_between_frames"])
-	$"%HideSupermeterToggle".connect("toggled", self, "_on_checkbox_toggle", ["hide_supermeter"])
 
 	var file = File.new()
 	if file.file_exists("res://DiscordRichPresence/ModHook.gd"):
@@ -130,6 +131,7 @@ func refresh_options():
 	refreshing_opts = true
 	$"%HideHUDToggle".set_pressed_no_signal(options.get_option("hide_hud"))
 	$"%HideSupermeterToggle".set_pressed_no_signal(options.get_option("hide_supermeter"))
+	$"%HideChatToggle".set_pressed_no_signal(options.get_option("hide_chat"))
 
 	var resolution = "%dp" % options.get_option("resolution")
 	$"%Resolution".selected = -1

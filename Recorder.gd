@@ -69,7 +69,6 @@ func set_ui_visibility(visible = false):
 		uilayer.get_node("GameUI/PausePanel"),
 		uilayer.get_node("YOMIRecordOptionsWindow"),
 		uilayer.get_node("ResimRequestScreen"),
-		uilayer.get_node("ChatWindow"),
 		uilayer.get_node("PostGameButtons"),
 		uilayer.get_node("NagWindow"),
 		uilayer.get_node("ReplayControls"),
@@ -80,6 +79,9 @@ func set_ui_visibility(visible = false):
 	if options.get_option("hide_supermeter"):
 		to_modulate.append(uilayer.get_node("GameUI/BottomBar/ActionButtons/VBoxContainer/P1InfoContainer"))
 		to_modulate.append(uilayer.get_node("GameUI/BottomBar/ActionButtons/VBoxContainer2/P2InfoContainer"))
+
+	if options.get_option("hide_chat"):
+		to_modulate.append(uilayer.get_node("ChatWindow"))
 
 	if not visible:
 		for node in to_modulate:

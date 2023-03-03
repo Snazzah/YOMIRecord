@@ -82,7 +82,7 @@ scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer"]
 margin_right = 236.0
-margin_bottom = 541.0
+margin_bottom = 554.0
 size_flags_horizontal = 3
 
 [node name="Spacer4" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
@@ -262,16 +262,25 @@ in screenshots and recordings."
 pressed = true
 text = "Hide Supermeter"
 
-[node name="Spacer2" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="HideChatToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 margin_top = 259.0
 margin_right = 236.0
-margin_bottom = 270.0
+margin_bottom = 271.0
+hint_tooltip = "Hides the multiplayer chat in screenshots."
+pressed = true
+text = "Hide Chat"
+
+[node name="Spacer2" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+margin_top = 272.0
+margin_right = 236.0
+margin_bottom = 283.0
 text = " "
 
 [node name="ScreenshotHeader" type="HBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 271.0
+margin_top = 284.0
 margin_right = 236.0
-margin_bottom = 283.0
+margin_bottom = 296.0
 
 [node name="Label3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer/ScreenshotHeader"]
 margin_right = 63.0
@@ -297,24 +306,24 @@ icon = ExtResource( 9 )
 
 [node name="SteamOverlayToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 284.0
+margin_top = 297.0
 margin_right = 236.0
-margin_bottom = 296.0
+margin_bottom = 309.0
 hint_tooltip = "Hits the F12 button for you instead
 of screnshotting natively.
 (If the Steam overlay is available)"
 text = "Use Steam overlay for screenshots"
 
 [node name="Spacer3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 297.0
+margin_top = 310.0
 margin_right = 236.0
-margin_bottom = 308.0
+margin_bottom = 321.0
 text = " "
 
 [node name="RecordingHeader" type="HBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 309.0
+margin_top = 322.0
 margin_right = 236.0
-margin_bottom = 321.0
+margin_bottom = 334.0
 
 [node name="Label3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer/RecordingHeader"]
 margin_right = 55.0
@@ -339,9 +348,9 @@ text = "Open Folder"
 icon = ExtResource( 9 )
 
 [node name="FormatContainer" type="HBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 322.0
+margin_top = 335.0
 margin_right = 236.0
-margin_bottom = 334.0
+margin_bottom = 347.0
 
 [node name="Spacer3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer/FormatContainer"]
 margin_right = 35.0
@@ -363,9 +372,9 @@ margin_bottom = 12.0
 text = "MP4"
 
 [node name="SpeedContainer" type="HBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 335.0
+margin_top = 348.0
 margin_right = 236.0
-margin_bottom = 347.0
+margin_bottom = 360.0
 
 [node name="Spacer3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer/SpeedContainer"]
 margin_right = 30.0
@@ -388,9 +397,9 @@ text = "1.0x"
 
 [node name="NativeSpeedToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 348.0
+margin_top = 361.0
 margin_right = 236.0
-margin_bottom = 360.0
+margin_bottom = 373.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Captures the game natvely at the speed
 (when available) instead of changing the
@@ -403,9 +412,9 @@ frames and the audio doesn't change pitch.
 text = "Record Speed Natively"
 
 [node name="VolumeContainer" type="HBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 361.0
+margin_top = 374.0
 margin_right = 236.0
-margin_bottom = 372.0
+margin_bottom = 385.0
 
 [node name="Spacer3" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer/VolumeContainer"]
 margin_right = 34.0
@@ -430,9 +439,9 @@ rounded = true
 
 [node name="NormalAudioToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 373.0
+margin_top = 386.0
 margin_right = 236.0
-margin_bottom = 385.0
+margin_bottom = 398.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Normalizes the audio uses
 FFmpeg's \"Dynaudnorm\" audio filter."
@@ -440,25 +449,25 @@ text = "Normalize Audio"
 
 [node name="MuteAudioToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 386.0
+margin_top = 399.0
 margin_right = 236.0
-margin_bottom = 398.0
+margin_bottom = 411.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Removes audio, if you didn't like the cool sound effects."
 text = "Remove Audio"
 
 [node name="Label4" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 399.0
+margin_top = 412.0
 margin_right = 236.0
-margin_bottom = 424.0
+margin_bottom = 437.0
 text = "
 Third-party"
 
 [node name="DRPToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 425.0
+margin_top = 438.0
 margin_right = 236.0
-margin_bottom = 437.0
+margin_bottom = 450.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Shows \"Recording a replay\" in your
 Discord Rich Presence while recording."
@@ -466,9 +475,9 @@ text = "Use Discord Rich Presence"
 
 [node name="DRPRequireLabel" type="RichTextLabel" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 438.0
+margin_top = 451.0
 margin_right = 236.0
-margin_bottom = 450.0
+margin_bottom = 463.0
 size_flags_vertical = 4
 custom_colors/default_color = Color( 0.666667, 0.666667, 0.666667, 1 )
 custom_fonts/mono_font = ExtResource( 6 )
@@ -479,17 +488,17 @@ fit_content_height = true
 scroll_active = false
 
 [node name="Label5" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 451.0
+margin_top = 464.0
 margin_right = 236.0
-margin_bottom = 476.0
+margin_bottom = 489.0
 text = "
 Advanced"
 
 [node name="SkipFilesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 477.0
+margin_top = 490.0
 margin_right = 236.0
-margin_bottom = 489.0
+margin_bottom = 502.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Skips a cleanup step where temporary PNG frames
 and WAV audio are deleted so you can use that for whatever.
@@ -499,9 +508,9 @@ text = "Skip File Cleanup"
 
 [node name="ExecWindowToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 490.0
+margin_top = 503.0
 margin_right = 236.0
-margin_bottom = 502.0
+margin_bottom = 515.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Skips a cleanup step where temporary PNG frames
 and WAV audio so you can use that for whenever.
@@ -511,9 +520,9 @@ text = "Show Execute Console"
 
 [node name="PauseBetweenFramesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 503.0
+margin_top = 516.0
 margin_right = 236.0
-margin_bottom = 515.0
+margin_bottom = 528.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Pauses between writing frames, so the game
 doesn't stop responding while writing.
@@ -523,9 +532,9 @@ but useful if your system locks up easily."
 text = "Pause Between Writing Frames"
 
 [node name="EndLabel" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 516.0
+margin_top = 529.0
 margin_right = 236.0
-margin_bottom = 541.0
+margin_bottom = 554.0
 custom_colors/font_color = Color( 0.133333, 0.133333, 0.133333, 1 )
 text = "
 -- end of list --"
