@@ -56,7 +56,6 @@ func set_ui_visibility(visible = false):
 		uilayer.get_node("GameUI/TopInfoMP"),
 		uilayer.get_node("GameUI/TopInfoReplay"),
 		uilayer.get_node("GameUI/HelpButton"),
-		uilayer.get_node("GameUI/ResetZoomButton"),
 		uilayer.get_node("GameUI/AdvantageLabel"),
 		uilayer.get_node("GameUI/PredictionSettingsOpenButton"),
 		uilayer.get_node("P1TurnTimerBar"),
@@ -67,6 +66,8 @@ func set_ui_visibility(visible = false):
 	]
 	var to_modulate = [
 		uilayer.get_node("GameUI/PausePanel"),
+		uilayer.get_node("GameUI/HelpScreen"),
+		uilayer.get_node("GameUI/ResetZoomButton"),
 		uilayer.get_node("YOMIRecordOptionsWindow"),
 		uilayer.get_node("ResimRequestScreen"),
 		uilayer.get_node("PostGameButtons"),
