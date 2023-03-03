@@ -82,7 +82,7 @@ scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer"]
 margin_right = 236.0
-margin_bottom = 489.0
+margin_bottom = 541.0
 size_flags_horizontal = 3
 
 [node name="Spacer4" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
@@ -248,7 +248,7 @@ unique_name_in_owner = true
 margin_top = 233.0
 margin_right = 236.0
 margin_bottom = 245.0
-hint_tooltip = "Hudes the HUD in screenshots and recordings."
+hint_tooltip = "Hides the HUD in screenshots and recordings."
 pressed = true
 text = "Hide HUD"
 
@@ -257,7 +257,7 @@ unique_name_in_owner = true
 margin_top = 246.0
 margin_right = 236.0
 margin_bottom = 258.0
-hint_tooltip = "Hudes the supermeter (and other character info)
+hint_tooltip = "Hides the supermeter (and other character info)
 in screenshots and recordings."
 pressed = true
 text = "Hide Supermeter"
@@ -452,25 +452,56 @@ margin_top = 399.0
 margin_right = 236.0
 margin_bottom = 424.0
 text = "
-Advanced"
+Third-party"
 
-[node name="SkipFilesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="DRPToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
 margin_top = 425.0
 margin_right = 236.0
 margin_bottom = 437.0
 rect_pivot_offset = Vector2( -430, 13 )
+hint_tooltip = "Shows \"Recording a replay\" in your
+Discord Rich Presence while recording."
+text = "Use Discord Rich Presence"
+
+[node name="DRPRequireLabel" type="RichTextLabel" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 438.0
+margin_right = 236.0
+margin_bottom = 450.0
+size_flags_vertical = 4
+custom_colors/default_color = Color( 0.666667, 0.666667, 0.666667, 1 )
+custom_fonts/mono_font = ExtResource( 6 )
+bbcode_enabled = true
+bbcode_text = "This requires the [color=#3498db][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2941398687]Discord Rich Presence[/url][/color] mod."
+text = "This requires the Discord Rich Presence mod."
+fit_content_height = true
+scroll_active = false
+
+[node name="Label5" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+margin_top = 451.0
+margin_right = 236.0
+margin_bottom = 476.0
+text = "
+Advanced"
+
+[node name="SkipFilesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 477.0
+margin_right = 236.0
+margin_bottom = 489.0
+rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Skips a cleanup step where temporary PNG frames
-and WAV audio so you can use that for whenever.
+and WAV audio are deleted so you can use that for whatever.
 
 (Temp folders are in the folder above screenshots/replays)"
 text = "Skip File Cleanup"
 
 [node name="ExecWindowToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 438.0
+margin_top = 490.0
 margin_right = 236.0
-margin_bottom = 450.0
+margin_bottom = 502.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Skips a cleanup step where temporary PNG frames
 and WAV audio so you can use that for whenever.
@@ -480,9 +511,9 @@ text = "Show Execute Console"
 
 [node name="PauseBetweenFramesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 451.0
+margin_top = 503.0
 margin_right = 236.0
-margin_bottom = 463.0
+margin_bottom = 515.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Pauses between writing frames, so the game
 doesn't stop responding while writing.
@@ -492,9 +523,9 @@ but useful if your system locks up easily."
 text = "Pause Between Writing Frames"
 
 [node name="EndLabel" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 464.0
+margin_top = 516.0
 margin_right = 236.0
-margin_bottom = 489.0
+margin_bottom = 541.0
 custom_colors/font_color = Color( 0.133333, 0.133333, 0.133333, 1 )
 text = "
 -- end of list --"

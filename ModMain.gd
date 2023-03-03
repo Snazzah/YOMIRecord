@@ -19,5 +19,7 @@ func _init(modLoader = ModLoader):
 	var file = File.new()
 	if file.file_exists("res://SoupModOptions/ModOptions.gd"):
 		modLoader.installScriptExtension("res://YOMIRecord/ModOptionsAddon.gd")
+	if file.file_exists("res://DiscordRichPresence/ModHook.gd"):
+		modLoader.installScriptExtension("res://YOMIRecord/DRPAddon.gd")
 
 	name = "YOMIRecord"

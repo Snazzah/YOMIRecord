@@ -18,6 +18,7 @@ func _ready():
 	$"%Version".text = "v%s" % yomiRecord.VERSION
 	$"%FFmpegDescLabel".connect("meta_clicked", self, "_on_meta_clicked")
 	$"%AuthorLabel".connect("meta_clicked", self, "_on_meta_clicked")
+	$"%DRPRequireLabel".connect("meta_clicked", self, "_on_meta_clicked_overlay")
 	$"%ShowButton".connect("pressed", self, "hide")
 	$"%RecordButton".connect("pressed", self, "_on_record")
 	$"%RefreshButton".connect("pressed", self, "refresh")
@@ -35,10 +36,16 @@ func _ready():
 	$"%NativeSpeedToggle".connect("toggled", self, "_on_checkbox_toggle", ["native_speed"])
 	$"%NormalAudioToggle".connect("toggled", self, "_on_checkbox_toggle", ["normalize_audio"])
 	$"%MuteAudioToggle".connect("toggled", self, "_on_checkbox_toggle", ["mute_audio"])
+	$"%DRPToggle".connect("toggled", self, "_on_checkbox_toggle", ["drp_record"])
 	$"%SkipFilesToggle".connect("toggled", self, "_on_checkbox_toggle", ["skip_files"])
 	$"%ExecWindowToggle".connect("toggled", self, "_on_checkbox_toggle", ["exec_console"])
 	$"%PauseBetweenFramesToggle".connect("toggled", self, "_on_checkbox_toggle", ["pause_between_frames"])
 	$"%HideSupermeterToggle".connect("toggled", self, "_on_checkbox_toggle", ["hide_supermeter"])
+
+	var file = File.new()
+	if file.file_exists("res://DiscordRichPresence/ModHook.gd"):
+		$"%DRPRequireLabel".hide()
+	else: $"%DRPToggle".disabled = true
 
 	for res in resolutions: $"%Resolution".add_item(res)
 	for fmt in formats: $"%Format".add_item(fmt)
@@ -51,6 +58,9 @@ func _ready():
 
 func _on_meta_clicked(meta):
 	OS.shell_open(meta)
+
+func _on_meta_clicked_overlay(meta):
+	Steam.activateGameOverlayToWebPage(meta)
 
 func _on_download():
 	ffmpeg.download_binary()
@@ -141,6 +151,7 @@ func refresh_options():
 	$"%Volume".value = options.get_option("volume")
 	$"%NormalAudioToggle".set_pressed_no_signal(options.get_option("normalize_audio"))
 	$"%MuteAudioToggle".set_pressed_no_signal(options.get_option("mute_audio"))
+	$"%DRPToggle".set_pressed_no_signal(options.get_option("drp_record"))
 	$"%SkipFilesToggle".set_pressed_no_signal(options.get_option("skip_files"))
 	$"%ExecWindowToggle".set_pressed_no_signal(options.get_option("exec_console"))
 	$"%PauseBetweenFramesToggle".set_pressed_no_signal(options.get_option("pause_between_frames"))

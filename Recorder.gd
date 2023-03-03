@@ -73,7 +73,8 @@ func set_ui_visibility(visible = false):
 		uilayer.get_node("PostGameButtons"),
 		uilayer.get_node("NagWindow"),
 		uilayer.get_node("ReplayControls"),
-		get_tree().get_root().get_node("Main/HudLayer/HudLayer/HboxContainer") # Show style buttons
+		get_tree().get_root().get_node("Main/HudLayer/HudLayer/HboxContainer"), # Show style buttons
+		uilayer.get_node("DiscordRichPresenceLayer") # Discord Rich Presence
 	]
 
 	if options.get_option("hide_supermeter"):

@@ -15,7 +15,8 @@ var default_options = {
 	"mute_audio": false,
 	"skip_files": false,
 	"exec_console": false,
-	"pause_between_frames": false
+	"pause_between_frames": false,
+	"drp_record": true
 }
 
 var options = {}
