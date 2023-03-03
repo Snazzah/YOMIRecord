@@ -16,6 +16,7 @@ func _on_reset():
 func _on_record():
 	if not ffmpeg.ffmpeg_path:
 		return recorder.show_options()
+	recorder.show_options(false)
 	recorder.record()
 	
 func _on_screenshot():
