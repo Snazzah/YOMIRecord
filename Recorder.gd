@@ -459,7 +459,7 @@ func _physics_process(delta):
 		return
 	
 	# Replay stopped playback? End recording early
-	if not ReplayManager.playback:
+	if not ReplayManager.playback and Global.current_game.is_waiting_on_player() and not Global.current_game.game_finished:
 		return post_recording()
 
 	# Snapshot and Store Image
