@@ -186,17 +186,21 @@ func get_native_speed():
 	elif speed == 0.25: return 4
 	return null
 
-func spawn_file_toast(type, file_name, time_elapsed_msec = -1, frames_taken = -1):
+func spawn_file_toast(type, file_name: String, time_elapsed_msec = -1, frames_taken = -1):
 	var toast_container = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/Toasts/ToastContainer")
 	var toast = load("res://YOMIRecord/ui/overlay/FileToast.tscn").instance()
 	toast_container.add_child(toast)
 	toast.file_path = "user://%ss/%s" % [type, file_name]
 	toast.folder_path = "user://%ss" % type
 
+	var truncated_filename: String = file_name
+	if file_name.length() > 30:
+		truncated_filename = truncated_filename.substr(0, 27) + "..."
+
 	if time_elapsed_msec != -1 and frames_taken != -1:
 		var time_elapsed = float(time_elapsed_msec) / 1000
 		var fps = float(frames_taken) / time_elapsed
-		toast.set_text("Saved %s to [color=#fff][u]%s[/u][/color] [color=#555](took %.2fs, %.2f fps)[/color]" % [type, file_name, time_elapsed, fps])
+		toast.set_text("Saved %s to [color=#fff][u]%s[/u][/color] [color=#555](took %.2fs, %.2f fps)[/color]" % [type, truncated_filename, time_elapsed, fps])
 	else:
 		toast.set_text("Saved %s to [color=#fff][u]%s[/u][/color]" % [type, file_name])
 
@@ -327,7 +331,8 @@ func post_recording():
 
 	print("YOMIRecord: Rendering...")
 	var global_path = ProjectSettings.globalize_path(local_path)
-	var video_name = generate_timed_name()
+	var usernames = get_player_names()
+	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1])).replace(" ", "_")
 	var audio_muted = options.get_option("mute_audio")
 
 	# Apply Resolution
@@ -378,7 +383,6 @@ func post_recording():
 #		ffmpegExtraArgs.append("-disposition:2 attached_pic")
 
 	# Run FFmpeg
-	var usernames = get_player_names()
 	var final_path = ProjectSettings.globalize_path("user://recordings/" + video_name)
 	var ffmpegArgs = PoolStringArray([
 		"-framerate %d" % framerate,
