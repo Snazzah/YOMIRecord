@@ -3,6 +3,7 @@ extends Node2D
 signal download_status_changed()
 
 var ffmpeg_path = null
+var ffmpeg_can_fork = true
 var download_status = 0
 var download_failed = false
 var download_progress = 0
@@ -14,6 +15,8 @@ var binary_release_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-esse
 var binary_sha256_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip.sha256"
 var binary_output_path = "user://yomirecord/ffmpeg-release-essentials.zip"
 var binary_final_path = "user://yomirecord/ffmpeg.exe"
+
+var BINARY_USER_PATH = ProjectSettings.globalize_path("user://yomirecord/ffmpeg.exe")
 
 func _ready():
 	http.use_threads = true
@@ -31,10 +34,9 @@ func _ready():
 func get_version(ffmpeg = ffmpeg_path):
 	var output = []
 	var exit_code = OS.execute(ffmpeg, ["-version"], true, output, false, false)
-	if exit_code != 0:
-		return null
-	else:
-		return output[0].substr(15).split(" ")[0]
+	if exit_code == ERR_CANT_FORK: return ""
+	elif exit_code != 0: return null
+	else: return output[0].substr(15).split(" ")[0]
 	return null
 
 func unzip_archive(from, to):
@@ -59,21 +61,28 @@ func list_files_in_directory(path):
 
 func check_for_binaries():
 	var available_paths = PoolStringArray([
+		BINARY_USER_PATH,
 		"ffmpeg",
-		"ffmpeg.exe",
-		ProjectSettings.globalize_path("user://yomirecord/ffmpeg.exe")
+		"ffmpeg.exe"
 	])
+	var file = File.new()
 
 	ffmpeg_path = null
 	for binary_path in available_paths:
+		if binary_path == BINARY_USER_PATH and not file.file_exists(BINARY_USER_PATH): continue
 		var version = get_version(binary_path)
-		print("tried %s, got " % binary_path, version)
+		print("YOMIRecord: tried %s, got " % binary_path, version)
+		if version == "":
+			print("YOMIRecord: trying to use ffmpeg gave an ERR_CANT_FORK, so we are backing off")
+			ffmpeg_can_fork = false
+			break
 		if version != null:
 			ffmpeg_path = binary_path
 			break
+		ffmpeg_can_fork = true
 
 func using_downloaded_binary():
-	return ffmpeg_path == ProjectSettings.globalize_path("user://yomirecord/ffmpeg.exe")
+	return ffmpeg_path == BINARY_USER_PATH
 
 func download_binary():
 	if download_status != 0: return

@@ -97,6 +97,10 @@ func refresh_ffmpeg_ui():
 	$"%DownloadButton".disabled = ffmpeg.download_status != 0 or ffmpeg.ffmpeg_path != null and not ffmpeg.using_downloaded_binary() or OS.get_name() != "Windows"
 	$"%FFmpegWarnLabel".visible = ffmpeg.download_status == 0 and ffmpeg.ffmpeg_path == null
 
+	if not ffmpeg.ffmpeg_can_fork:
+		$"%FFmpegStatusLabel".text = "Unexpected error"
+		return
+
 	if ffmpeg.download_status != 0:
 		$"%FFmpegStatusLabel".add_color_override("font_color", Color(0, 0, 1))
 		if ffmpeg.download_status == 1:
@@ -123,8 +127,6 @@ func refresh_ffmpeg_ui():
 			if ffmpeg.download_failed:
 				$"%FFmpegStatusLabel".text = "Download failed!"
 			else: $"%FFmpegStatusLabel".text = "Not installed!"
-			
-	pass
 
 func refresh_options():
 	if refreshing_opts: return
