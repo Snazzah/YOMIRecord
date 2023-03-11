@@ -332,7 +332,7 @@ func post_recording():
 	print("YOMIRecord: Rendering...")
 	var global_path = ProjectSettings.globalize_path(local_path)
 	var usernames = get_player_names()
-	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1])).replace(" ", "_")
+	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1]))
 	var audio_muted = options.get_option("mute_audio")
 
 	# Apply Resolution
@@ -347,22 +347,33 @@ func post_recording():
 	var format = options.get_option("recording_format")
 	if format == "webm":
 		video_name += ".webm"
-		ffmpegExtraArgs.append("-c:v libvpx-vp9")
+		ffmpegExtraArgs.append_array([
+			"-c:v", "libvpx-vp9"
+		])
 	if format == "avi":
 		video_name += ".avi"
+		ffmpegExtraArgs.append_array([
+			"-c:v", "mpeg4"
+		])
 		ffmpegExtraArgs.append("-c:v mpeg4")
 	else:
 		video_name += ".mp4"
-		ffmpegExtraArgs.append("-c:v libx264")
-		ffmpegExtraArgs.append("-preset veryslow")
+		ffmpegExtraArgs.append_array([
+			"-c:v", "libx264",
+			"-preset", "veryslow"
+		])
 
 	# Apply Audio Effects
 	if not audio_muted:
 		var volume = float(options.get_option("volume")) / 100
 		if volume != 1:
-			ffmpegExtraArgs.append("-filter:a volume=%.2f" % volume)
+			ffmpegExtraArgs.append_array([
+				"-filter:a", "volume=%.2f" % volume
+			])
 		if options.get_option("normalize_audio"):
-			ffmpegExtraArgs.append("-filter:a dynaudnorm")
+			ffmpegExtraArgs.append_array([
+				"-filter:a", "dynaudnorm"
+			])
 	
 	# Change Video Speed
 	var native_speed = get_native_speed()
@@ -372,36 +383,34 @@ func post_recording():
 		if framerate <= 0: framerate = 1
 		# https://superuser.com/a/1667260
 		if not audio_muted and framerate != 60:
-			ffmpegExtraArgs.append('-af "asetrate=44100*%s,aresample=44100"' % str(float(framerate) / 60))
+			ffmpegExtraArgs.append_array([
+				"-af", "asetrate=44100*%s,aresample=44100" % str(float(framerate) / 60)
+			])
 
 	if audio_muted: ffmpegExtraArgs.append("-an")
-	
-	# Fix thumbnail
-#	if video_name.ends_with(".mp4"):
-#		ffmpegExtraArgs.append("-map 2")
-#		ffmpegExtraArgs.append("-c:2 copy")
-#		ffmpegExtraArgs.append("-disposition:2 attached_pic")
 
 	# Run FFmpeg
 	var final_path = ProjectSettings.globalize_path("user://recordings/" + video_name)
 	var ffmpegArgs = PoolStringArray([
-		"-framerate %d" % framerate,
-		"-i " + global_path + "/%d.png",
-		"-i " + global_path + "/audio.wav",
-#		"-i " + global_path + "/0.png",
-		"-map 0:v",
-		"-map 1:a",
-#		"-crf 17", $ 17-37 (37 is worst)
-		"-pix_fmt yuv420p",
-		"-vf vflip",
-		"-s %s" % res_size,
-		"-sws_flags neighbor",
-		"-metadata title=\"" + usernames[0].replace('"', '\\"') + " vs " + usernames[1].replace('"', '\\"') + "\"",
-		'-metadata comment="Recording of Your Only Move Is Hustle [%s], created using Y.O.M.I Record"' % Global.VERSION.replace('"', '\\"')
+		"-framerate", str(framerate),
+		"-i", "%s/%%d.png" % global_path,
+		"-i", "%s/audio.wav" % global_path,
+		"-map", "0:v",
+		"-map", "1:a",
+#		"-crf", "17", # 17-37 (37 is worst)
+		"-pix_fmt", "yuv420p",
+		"-vf", "vflip",
+		"-s", res_size,
+		"-sws_flags", "neighbor",
+		"-metadata", "title=" + usernames[0].replace('"', '\\"') + " vs " + usernames[1].replace('"', '\\"'),
+		"-metadata", "comment=Recording of Your Only Move Is Hustle [%s], created using Y.O.M.I Record" % Global.VERSION.replace('"', '\\"')
 	]);
-	var ffmpegCommand = PoolStringArray([ffmpeg.ffmpeg_path, ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), final_path]).join(" ");
-	print("YOMIRecord: using cmd: ", ffmpegCommand)
-	var exit_code = OS.execute("cmd", ['/c %s' % ffmpegCommand], true, [], false, options.get_option("exec_console"))
+	print(ffmpegArgs)
+	var ffmpegCommand = PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" ");
+	print("YOMIRecord: running command: %s " % ffmpegCommand, PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" "))
+	var output = []
+	var exit_code = OS.execute(ffmpeg.ffmpeg_path, ffmpegArgs + ffmpegExtraArgs + PoolStringArray([final_path]), true, output, true, options.get_option("exec_console"))
+	print("YOMIRecord: ffmpeg output", output[0])
 	print("YOMIRecord: Finished rendering with exit code %d" % exit_code)
 
 	if exit_code != 0:
