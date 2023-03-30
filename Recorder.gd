@@ -340,7 +340,8 @@ func post_recording():
 	var res_size = "640x360"
 	if resolution != 360:
 		var resolution_scale = float(resolution) / float(get_viewport().size.y)
-		res_size = "%dx%d" % [int(get_viewport().size.x * resolution_scale), int(get_viewport().size.y * resolution_scale)]
+		res_size = "%dx%d" % [int(ceil(get_viewport().size.x * resolution_scale)), int(get_viewport().size.y * resolution_scale)]
+		if resolution == 480: res_size = "854x480"
 
 	# Apply Format
 	var ffmpegExtraArgs = PoolStringArray()
