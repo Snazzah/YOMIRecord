@@ -1,17 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://YOMIRecord/ui/screenshot.png" type="Texture" id=1]
 [ext_resource path="res://YOMIRecord/ui/resetplayback.png" type="Texture" id=2]
 [ext_resource path="res://YOMIRecord/ui/ExtraReplayOptions.gd" type="Script" id=3]
 [ext_resource path="res://YOMIRecord/ui/record.png" type="Texture" id=4]
 [ext_resource path="res://YOMIRecord/ui/settings.png" type="Texture" id=5]
-
-[sub_resource type="InputEventAction" id=3]
-action = "frame_advance"
-pressed = true
-
-[sub_resource type="ShortCut" id=4]
-shortcut = SubResource( 3 )
 
 [node name="YOMIRecordPlaybackOptions" type="HBoxContainer"]
 margin_top = 13.0
@@ -27,7 +20,6 @@ margin_bottom = 20.0
 hint_tooltip = "Restart the replay"
 shortcut_in_tooltip = false
 action_mode = 0
-shortcut = SubResource( 4 )
 icon = ExtResource( 2 )
 
 [node name="Control" type="Control" parent="."]
@@ -44,7 +36,6 @@ margin_bottom = 20.0
 hint_tooltip = "Screenshot this frame"
 shortcut_in_tooltip = false
 action_mode = 0
-shortcut = SubResource( 4 )
 text = "Screenshot"
 icon = ExtResource( 1 )
 
@@ -62,7 +53,6 @@ margin_bottom = 20.0
 hint_tooltip = "Record this replay"
 shortcut_in_tooltip = false
 action_mode = 0
-shortcut = SubResource( 4 )
 text = "Record"
 icon = ExtResource( 4 )
 
@@ -80,5 +70,4 @@ margin_bottom = 20.0
 hint_tooltip = "Open Your Only Move Is Record Options"
 shortcut_in_tooltip = false
 action_mode = 0
-shortcut = SubResource( 4 )
 icon = ExtResource( 5 )

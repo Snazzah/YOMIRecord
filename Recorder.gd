@@ -410,7 +410,7 @@ func post_recording():
 	print("YOMIRecord: running command: %s " % ffmpegCommand, PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" "))
 	var output = []
 	var exit_code = OS.execute(ffmpeg.ffmpeg_path, ffmpegArgs + ffmpegExtraArgs + PoolStringArray([final_path]), true, output, true, options.get_option("exec_console"))
-	print("YOMIRecord: ffmpeg output", output[0])
+	print("YOMIRecord: ", output[0])
 	print("YOMIRecord: Finished rendering with exit code %d" % exit_code)
 
 	if exit_code != 0:
