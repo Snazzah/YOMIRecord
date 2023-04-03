@@ -40,7 +40,8 @@ func get_version(ffmpeg = ffmpeg_path):
 	return null
 
 func unzip_archive(from, to):
-	var exit_code = OS.execute("powershell", ["powershell -command \"Expand-Archive -Force %s %s\"" % [ProjectSettings.globalize_path(from), ProjectSettings.globalize_path(to)]], true, [], false, false)
+	var exit_code = OS.execute("tar", ["-xf", ProjectSettings.globalize_path(from), "-C", ProjectSettings.globalize_path(to)], true, [], false, false)
+	print("YOMIRecord: extracted result ", exit_code)
 	return exit_code == 0
 
 func list_files_in_directory(path):
