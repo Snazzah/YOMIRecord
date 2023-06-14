@@ -14,6 +14,11 @@ var recording_frames = []
 var recording_end_buffer = 115
 var recording_show_playback_controls = false
 
+var thread_counter_current:int = 0
+var thread_counter_final:int = 0
+var writer_thread:Thread
+var writer_thread_semaphore:Semaphore = Semaphore.new()
+
 var default_recording_bus_volume = -0.130497
 
 onready var options = get_tree().get_root().get_node("ModLoader/YOMIRecord/YOMIRecordOptions")
@@ -281,15 +286,22 @@ func pre_recording():
 		record_effect = AudioEffectRecord.new()
 		print("YOMIRecord: Created record audio effect")
 		AudioServer.add_bus_effect(idx, record_effect)
-	record_effect.set_recording_active(true)
 
 	# Prepare Directory
 	recording_id = randi() % 10000000
-	Directory.new().make_dir("user://yomirecord/_recording_%d" % recording_id)
+	var local_path = "user://yomirecord/_recording_%d" % recording_id
+	Directory.new().make_dir(local_path)
+
+	# Start writer thread
+	writer_thread = Thread.new()
+	writer_thread.start(self, "_thread_write", local_path, 0)
 	
 	# Window Stuff
 	OS.set_window_title("Your Only Move Is HUSTLE (Recording)")
 	change_window_icon("recording")
+
+	# Start recording
+	record_effect.set_recording_active(true)
 	emit_signal("recording_started")
 
 func post_recording():
@@ -317,12 +329,18 @@ func post_recording():
 	yield (get_tree(), "idle_frame")
 	var start_time = Time.get_ticks_msec()
 	Global.frame_advance = true
-	var pause_btwn = options.get_option("pause_between_frames")
-	for frame_num in frames_length:
-		var frame: Image = recording_frames[frame_num]
-		frame.save_png("%s/%d.png" % [local_path, frame_num])
-		if pause_btwn: yield (get_tree(), "idle_frame")
+#	var pause_btwn = options.get_option("pause_between_frames")
+#	for frame_num in frames_length:
+#		var frame: Image = recording_frames[frame_num]
+#		frame.save_png("%s/%d.png" % [local_path, frame_num])
+#		if pause_btwn: yield (get_tree(), "idle_frame")
+#	recording_frames.clear()
+	thread_counter_final = frames_length
+	writer_thread_semaphore.post()
+	writer_thread.wait_to_finish()
 	recording_frames.clear()
+	thread_counter_current = 0
+	thread_counter_final = 0
 	Global.frame_advance = false
 
 	var dir = Directory.new()
@@ -464,6 +482,16 @@ func record():
 		return true
 	return false
 
+func _thread_write(local_path):
+	while true:
+		writer_thread_semaphore.wait()
+		if thread_counter_final > 0 && thread_counter_final == thread_counter_current:
+			return
+		var frame: Image = recording_frames[thread_counter_current]
+		frame.save_png("%s/%d.png" % [local_path, thread_counter_current])
+		recording_frames[thread_counter_current] = null
+		thread_counter_current += 1
+
 func _physics_process(delta):
 	if not recording: return
 
@@ -484,6 +512,7 @@ func _physics_process(delta):
 
 	# Save Frame
 	recording_frames.append(image)
+	writer_thread_semaphore.post()
 
 	# Pad ending frames, to show player win UI
 	if Global.current_game.game_finished:
