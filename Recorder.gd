@@ -222,11 +222,12 @@ func set_rendering_overlay(visible = true, frames = -1):
 	var overlay: MarginContainer = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/RenderingOverlay")
 	overlay.visible = visible
 	var frames_label: Label = overlay.get_node("HContainer/Detail")
-	var eta = float(frames) / 40
-	var eta2 = float(frames) / 20
+	var eta = float(frames) / 50
+	var eta2 = float(frames) / 90
 	frames_label.text = "Rendering %d frames... ETA: %.2f-%.2f seconds" % [frames, eta, eta2]
 	var warn_label: Label = overlay.get_node("HContainer/FrameWarn")
-	warn_label.visible = not options.get_option("pause_between_frames")
+#	warn_label.visible = not options.get_option("pause_between_frames")
+	warn_label.visible = false
 	yield(VisualServer, "frame_post_draw")
 
 func set_yomirecord_overlay_visible(visible = true):
