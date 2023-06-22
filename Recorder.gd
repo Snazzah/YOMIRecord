@@ -370,12 +370,11 @@ func post_recording():
 		ffmpegExtraArgs.append_array([
 			"-c:v", "libvpx-vp9"
 		])
-	if format == "avi":
+	elif format == "avi":
 		video_name += ".avi"
 		ffmpegExtraArgs.append_array([
 			"-c:v", "mpeg4"
 		])
-		ffmpegExtraArgs.append("-c:v mpeg4")
 	else:
 		video_name += ".mp4"
 		ffmpegExtraArgs.append_array([
