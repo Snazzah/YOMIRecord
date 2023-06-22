@@ -127,13 +127,14 @@ text = "
 Your recording is now being rendered with FFmpeg.
 Be patient! This will take time and the game may temporarily stop responding for a bit.
 
-Renders usually go for around 20-40 frames per second. (Check the ETA below)
+Renders usually go for around 20-30 frames per second. (Check the ETA below)
 In the meantime, don't mess with the game please.
 "
 fit_content_height = true
 scroll_active = false
 
 [node name="FrameWarn" type="Label" parent="Overlay/RenderingOverlay/HContainer"]
+visible = false
 margin_top = 261.0
 margin_right = 652.0
 margin_bottom = 272.0
