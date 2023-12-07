@@ -13,6 +13,11 @@ var resolutions = PoolStringArray(["360p", "480p", "720p", "1080p", "1440p"])
 var formats = PoolStringArray(["mp4", "webm", "avi"])
 var speeds = PoolStringArray(["0.25x", "0.5x", "1x", "2x", "4x"])
 
+enum DownloadMoreMenuAction {
+	LEGACY_DOWNLOAD,
+	REMOVE_BINARY
+}
+
 func _ready():
 	$"%Title".text = "%s (%s)" % [yomiRecord.MOD_NAME, yomiRecord.VERSION]
 	$"%Version".text = "v%s" % yomiRecord.VERSION
@@ -54,6 +59,13 @@ func _ready():
 	refresh_values()
 	refresh_ui()
 
+	var more_popup = $"%DLMoreButton".get_popup()
+	more_popup.add_item("Legacy Download", DownloadMoreMenuAction.LEGACY_DOWNLOAD)
+	more_popup.add_item("Remove", DownloadMoreMenuAction.REMOVE_BINARY)
+	more_popup.connect("id_pressed", self, "_on_more_popup_select")
+
+	$"%FFmpegLinuxLabel".visible = OS.get_name() != "Windows"
+
 	ffmpeg.connect("download_status_changed", self, "_on_download_status_change")
 	hide()
 
@@ -64,7 +76,17 @@ func _on_meta_clicked_overlay(meta):
 	Steam.activateGameOverlayToWebPage(meta)
 
 func _on_download():
-	ffmpeg.download_binary()
+	ffmpeg.download()
+
+func _on_more_popup_select(id: int):
+	if ffmpeg.download_status != 0 or OS.get_name() != "Windows": return
+
+	if id == DownloadMoreMenuAction.LEGACY_DOWNLOAD:
+		ffmpeg.download_binary()
+	elif id == DownloadMoreMenuAction.REMOVE_BINARY:
+		var dir = Directory.new()
+		dir.remove(ffmpeg.binary_final_path)
+		refresh_ui()
 
 func _on_record():
 	recorder.show_options(false)
@@ -96,6 +118,17 @@ func refresh_values():
 func refresh_ffmpeg_ui():
 	$"%DownloadButton".disabled = ffmpeg.download_status != 0 or ffmpeg.ffmpeg_path != null and not ffmpeg.using_downloaded_binary() or OS.get_name() != "Windows"
 	$"%FFmpegWarnLabel".visible = ffmpeg.download_status == 0 and ffmpeg.ffmpeg_path == null
+	
+	$"%DLMoreButton".disabled = ffmpeg.download_status != 0 or OS.get_name() != "Windows"
+	var more_popup: PopupMenu = $"%DLMoreButton".get_popup()
+	more_popup.set_item_disabled(
+		more_popup.get_item_index(DownloadMoreMenuAction.LEGACY_DOWNLOAD),
+		ffmpeg.download_status != 0 or ffmpeg.using_downloaded_binary() or OS.get_name() != "Windows"
+	)
+	more_popup.set_item_disabled(
+		more_popup.get_item_index(DownloadMoreMenuAction.REMOVE_BINARY),
+		ffmpeg.download_status != 0 or not ffmpeg.using_downloaded_binary() or OS.get_name() != "Windows"
+	)
 
 	if not ffmpeg.ffmpeg_can_fork:
 		$"%FFmpegStatusLabel".text = "Unexpected error"
@@ -109,6 +142,8 @@ func refresh_ffmpeg_ui():
 			$"%FFmpegStatusLabel".text = "Verifying..."
 		elif ffmpeg.download_status == 3:
 			$"%FFmpegStatusLabel".text = "Extracting..."
+		elif ffmpeg.download_status == 4:
+			$"%FFmpegStatusLabel".text = "Downloading via winget..."
 	else:
 		if ffmpeg.using_downloaded_binary():
 			$"%DownloadButton".text = "Update"

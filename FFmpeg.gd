@@ -39,6 +39,13 @@ func get_version(ffmpeg = ffmpeg_path):
 	else: return output[0].substr(15).split(" ")[0]
 	return null
 
+func get_winget_version():
+	var output = []
+	var exit_code = OS.execute("winget", ["--version"], true, output, false, false)
+	if exit_code != 0: return null
+	else: return output[0]
+	return null
+
 func unzip_archive(from, to):
 	var exit_code = OS.execute("tar", ["-xf", ProjectSettings.globalize_path(from), "-C", ProjectSettings.globalize_path(to)], true, [], false, false)
 	print("YOMIRecord: extracted result ", exit_code)
@@ -84,6 +91,32 @@ func check_for_binaries():
 
 func using_downloaded_binary():
 	return ffmpeg_path == BINARY_USER_PATH
+
+func download():
+	if download_status != 0: return
+
+	var winget_ver = get_winget_version()
+	if winget_ver != null:
+		print("YOMIRecord: Detected winget ", winget_ver)
+		
+		download_status = 4
+		emit_signal("download_status_changed")
+		
+		var thread = Thread.new()
+		thread.start(self, "_winget_download_thread")
+	else:
+		print("YOMIRecord: winget not found, reverting to legacy download")
+		download_binary()
+
+func _winget_download_thread():
+	var output = []
+	var exit_code = OS.execute("winget", ["install", "ffmpeg"], true, output, false, false)
+	print("YOMIRecord: Installed FFmpeg via winget with exit code ", exit_code)
+	print(output[0])
+	
+	download_status = 0
+	check_for_binaries()
+	emit_signal("download_status_changed")
 
 func download_binary():
 	if download_status != 0: return
