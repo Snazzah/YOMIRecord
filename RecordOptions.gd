@@ -76,8 +76,9 @@ func _on_meta_clicked_overlay(meta):
 	Steam.activateGameOverlayToWebPage(meta)
 
 func _on_download():
-	if ffmpeg.using_downloaded_binary(): ffmpeg.download_binary()
-	else: ffmpeg.download()
+	ffmpeg.download_binary()
+#	if ffmpeg.using_downloaded_binary(): ffmpeg.download_binary()
+#	else: ffmpeg.download()
 
 func _on_more_popup_select(id: int):
 	if ffmpeg.download_status != 0 or OS.get_name() != "Windows": return
