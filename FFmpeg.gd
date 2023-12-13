@@ -110,7 +110,7 @@ func download():
 
 func _winget_download_thread():
 	var output = []
-	var exit_code = OS.execute("winget", ["install", "ffmpeg"], true, output, false, false)
+	var exit_code = OS.execute("winget", ["install", "ffmpeg", "--disable-interactivity"], true, output, false, false)
 	print("YOMIRecord: Installed FFmpeg via winget with exit code ", exit_code)
 	print(output[0])
 	
