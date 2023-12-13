@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Zip Folder
-        run: zip -r ${{ github.event.repository.name }}_${{ github.ref_name }}.zip . -x ".git/*" ".github/*" ".gitignore" "__preview.png"
+        run: zip -r ${{ github.event.repository.name }}_${{ github.ref_name }}.zip . -x ".git/*" ".github/*" ".gitignore" "__preview.png" "__workshop_data.json"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
