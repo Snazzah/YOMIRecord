@@ -100,6 +100,11 @@ func set_ui_visibility(visible = false):
 		for node in to_self_modulate:
 			if node: node.self_modulate.a = 1
 
+func get_game_viewport():
+	var main = get_tree().get_root().get_node("Main")
+	return main.get_viewport()
+
+
 func screenshot():
 	var dir = Directory.new()
 	if not dir.dir_exists("user://screenshots"):
@@ -137,7 +142,7 @@ func screenshot():
 		yield (get_tree(), "idle_frame")
 		yield (get_tree(), "idle_frame")
 	else:
-		var viewport: Viewport = Global.current_game.get_viewport()
+		var viewport: Viewport = get_game_viewport()
 		viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
 
 		var image = viewport.get_texture().get_data()
@@ -505,7 +510,7 @@ func _physics_process(delta):
 		return post_recording()
 
 	# Snapshot and Store Image
-	var viewport: Viewport = Global.current_game.get_viewport()
+	var viewport: Viewport = get_game_viewport()
 	viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
 	var image = viewport.get_texture().get_data()
 #	image.flip_y()
