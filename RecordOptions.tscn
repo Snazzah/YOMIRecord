@@ -185,8 +185,8 @@ size_flags_vertical = 4
 custom_colors/default_color = Color( 0.6, 0.447059, 0.141176, 1 )
 custom_fonts/mono_font = ExtResource( 6 )
 bbcode_enabled = true
-bbcode_text = "Hi Linux user, you should install FFmpeg manually."
-text = "Hi Linux user, you should install FFmpeg manually."
+bbcode_text = "Hi Linux user, you should install FFmpeg manually and use the 'Legacy Runtime 1.0' from compatibility settings."
+text = "Hi Linux user, you should install FFmpeg manually and use the 'Legacy Runtime 1.0' from compatibility settings."
 fit_content_height = true
 scroll_active = false
 
