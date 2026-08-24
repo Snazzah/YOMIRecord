@@ -11,7 +11,7 @@ var refreshing_opts = false
 
 var resolutions = PoolStringArray(["360p", "480p", "720p", "1080p", "1440p"])
 var formats = PoolStringArray(["mp4", "webm", "avi"])
-var speeds = PoolStringArray(["0.25x", "0.5x", "1x", "2x", "4x"])
+var speeds = PoolStringArray(["0.25x", "0.5x", "0.75x", "1x", "2x", "4x"])
 
 enum DownloadMoreMenuAction {
 	LEGACY_DOWNLOAD,
@@ -41,6 +41,7 @@ func _ready():
 	$"%Volume".connect("value_changed", self, "_on_range_change", ["volume", $"%Volume", true])
 	$"%Speed".connect("item_selected", self, "_on_option_select", ["speed", $"%Speed"])
 	$"%NativeSpeedToggle".connect("toggled", self, "_on_checkbox_toggle", ["native_speed"])
+	$"%StableModeToggle".connect("toggled", self, "_on_checkbox_toggle", ["stable_mode"])
 	$"%NormalAudioToggle".connect("toggled", self, "_on_checkbox_toggle", ["normalize_audio"])
 	$"%MuteAudioToggle".connect("toggled", self, "_on_checkbox_toggle", ["mute_audio"])
 	$"%DRPToggle".connect("toggled", self, "_on_checkbox_toggle", ["drp_record"])
@@ -190,6 +191,7 @@ func refresh_options():
 		if speeds[i] == speed: $"%Speed".selected = i
 
 	$"%NativeSpeedToggle".set_pressed_no_signal(options.get_option("native_speed"))
+	$"%StableModeToggle".set_pressed_no_signal(options.get_option("stable_mode"))
 	$"%Volume".value = options.get_option("volume")
 	$"%NormalAudioToggle".set_pressed_no_signal(options.get_option("normalize_audio"))
 	$"%MuteAudioToggle".set_pressed_no_signal(options.get_option("mute_audio"))

@@ -5,14 +5,20 @@ signal recording_started()
 signal recording_ending()
 signal recording_ended()
 
+const FRAME_SKIP = 10
+const END_BUFFER = 115
+
 var recording = false
 var record_effect: AudioEffectRecord
 var recording_id = -1
 var recording_bus_volume = 0
-var recording_frame_skip = 10
+var recording_frame_skip = FRAME_SKIP
 var recording_frames = []
-var recording_end_buffer = 115
+var recording_end_buffer = END_BUFFER
 var recording_show_playback_controls = false
+var stable_recording = false
+var writer_finished = false
+var stable_recording_state
 
 var thread_counter_current:int = 0
 var thread_counter_final:int = 0
@@ -192,6 +198,7 @@ func get_native_speed():
 	if not options.get_option("native_speed"): return null
 	var speed = options.get_option("speed")
 	if speed == 1: return 1
+	elif speed == 0.75 and Global.has_method("get_playback_speed_factor"): return -1
 	elif speed == 0.5: return 2
 	elif speed == 0.25: return 4
 	return null
@@ -223,17 +230,23 @@ func spawn_text_toast(text, alert = false):
 	toast.set_text(text)
 	toast.pop(alert)
 
-func set_rendering_overlay(visible = true, frames = -1):
+func show_rendering_overlay(frames: int, recording_audio = false):
+	set_yomirecord_overlay_visible(true)
 	var overlay: MarginContainer = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/RenderingOverlay")
-	overlay.visible = visible
-	var frames_label: Label = overlay.get_node("HContainer/Detail")
-	var eta = float(frames) / 50
-	var eta2 = float(frames) / 90
-	frames_label.text = "Rendering %d frames... ETA: %.2f-%.2f seconds" % [frames, eta, eta2]
-	var warn_label: Label = overlay.get_node("HContainer/FrameWarn")
-#	warn_label.visible = not options.get_option("pause_between_frames")
-	warn_label.visible = false
-	yield(VisualServer, "frame_post_draw")
+	var detail
+	if recording_audio:
+		detail = "Recording audio for %d frames..." % frames
+	else:
+		var eta = float(frames) / 90
+		var eta2 = float(frames) / 50
+		detail = "Rendering %d frames... ETA: %.2f-%.2f seconds" % [frames, eta, eta2]
+	overlay.get_node("HContainer/Detail").text = detail
+	overlay.get_node("HContainer/FrameWarn").visible = false
+	overlay.visible = true
+
+func hide_rendering_overlay():
+	var overlay: MarginContainer = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/RenderingOverlay")
+	overlay.visible = false
 
 func set_yomirecord_overlay_visible(visible = true):
 	var layer: CanvasLayer = get_tree().get_root().get_node("Main/YOMIRecordLayer")
@@ -247,6 +260,11 @@ func reset_playback():
 	Global.current_game.game_started = false
 	Global.current_game.start_playback()
 
+func _set_recording_speed():
+	var playback_speed = get_native_speed()
+	if playback_speed == null: playback_speed = 1
+	Global.playback_speed_mod = playback_speed
+
 func show_options(visible = true):
 	var option_menu = get_tree().get_root().get_node("Main/UILayer/YOMIRecordOptionsWindow")
 	if visible:
@@ -258,7 +276,7 @@ func options_menu_visible():
 	var option_menu: PanelContainer = get_tree().get_root().get_node("Main/UILayer/YOMIRecordOptionsWindow")
 	return option_menu.visible
 
-func pre_recording():
+func _begin_recording():
 	emit_signal("recording_starting")
 
 	# Hide Layers
@@ -271,10 +289,34 @@ func pre_recording():
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
 
+	# Handle Audio and Record Audio Effect
+	recording_bus_volume = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Fx"))
+	if not options.get_option("mute_audio") and typeof(record_effect) == 0:
+		var idx = AudioServer.get_bus_index("Fx")
+		record_effect = AudioEffectRecord.new()
+		print("YOMIRecord: Created record audio effect")
+		AudioServer.add_bus_effect(idx, record_effect)
+
+	# Prepare Directory
+	recording_id = randi() % 10000000
+	var local_path = "user://yomirecord/_recording_%d" % recording_id
+
+	# Start writer thread
+	Directory.new().make_dir(local_path)
+	writer_thread = Thread.new()
+	writer_thread.start(self, "_thread_write", local_path, 0)
+
+	# Window Stuff
+	OS.set_window_title("Your Only Move Is HUSTLE (Recording)")
+	change_window_icon("recording")
+
+func pre_recording():
+	var begin_state = _begin_recording()
+	if begin_state is GDScriptFunctionState:
+		yield (begin_state, "completed")
+
 	# Reset and Start Playback
-	var playback_speed = get_native_speed()
-	if playback_speed == null: playback_speed = 1
-	Global.playback_speed_mod = playback_speed
+	_set_recording_speed()
 	reset_playback()
 	Global.frame_advance = true
 	yield (get_tree(), "idle_frame")
@@ -284,36 +326,130 @@ func pre_recording():
 	yield (get_tree(), "idle_frame")
 	Global.frame_advance = false
 
-	# Handle Audio and Record Audio Effect
-	recording_bus_volume = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Fx"))
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), default_recording_bus_volume)
-	if typeof(record_effect) == 0:
-		var idx = AudioServer.get_bus_index("Fx")
-		record_effect = AudioEffectRecord.new()
-		print("YOMIRecord: Created record audio effect")
-		AudioServer.add_bus_effect(idx, record_effect)
-
-	# Prepare Directory
-	recording_id = randi() % 10000000
-	var local_path = "user://yomirecord/_recording_%d" % recording_id
-	Directory.new().make_dir(local_path)
-
-	# Start writer thread
-	writer_thread = Thread.new()
-	writer_thread.start(self, "_thread_write", local_path, 0)
-	
-	# Window Stuff
-	OS.set_window_title("Your Only Move Is HUSTLE (Recording)")
-	change_window_icon("recording")
-
-	# Start recording
-	record_effect.set_recording_active(true)
+	if not options.get_option("mute_audio"):
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), default_recording_bus_volume)
+		record_effect.set_recording_active(true)
 	emit_signal("recording_started")
+
+func _wait_for_replay_reset(previous_game):
+	while not is_instance_valid(Global.current_game) or Global.current_game == previous_game or not Global.current_game.game_started:
+		yield (get_tree(), "idle_frame")
+
+func _reset_stable_playback(manual: bool):
+	Global.frame_advance = true
+	var previous_game = Global.current_game
+	reset_playback()
+	var reset_state = _wait_for_replay_reset(previous_game)
+	if reset_state is GDScriptFunctionState:
+		yield (reset_state, "completed")
+	Global.current_game.advance_frame_input = false
+	if Global.current_game.get("real_tick") != null: Global.current_game.real_tick = 0
+	Global.current_game.set_physics_process(not manual)
+	Global.frame_advance = false
+
+func _capture_recording_frame():
+	var viewport: Viewport = get_game_viewport()
+	viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
+	var image = viewport.get_texture().get_data()
+	recording_frames.append(image)
+	writer_thread_semaphore.post()
+
+func _finish_writer(frames_length: int):
+	if writer_finished: return
+	thread_counter_final = frames_length
+	writer_thread_semaphore.post()
+	print("YOMIRecord: Render thread signalled to finish at frame %d (of %d)" % [thread_counter_current, frames_length])
+	while writer_thread.is_alive():
+		yield (get_tree(), "idle_frame")
+	print("YOMIRecord: Render thread inactive")
+	writer_thread.wait_to_finish()
+	print("YOMIRecord: Render thread finished")
+	writer_finished = true
+
+func _run_ffmpeg(data):
+	var output = []
+	var exit_code = OS.execute(data[0], data[1], true, output, true, data[2])
+	return [exit_code, output]
+
+func stable_record():
+	# Pre-recording
+	var begin_state = _begin_recording()
+	if begin_state is GDScriptFunctionState:
+		yield (begin_state, "completed")
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), -80)
+	emit_signal("recording_started")
+
+	# Setup the game
+	_set_recording_speed()
+	var reset_state = _reset_stable_playback(true)
+	if reset_state is GDScriptFunctionState:
+		yield (reset_state, "completed")
+	var game = Global.current_game
+
+	# Frame by frame recording
+	var video_skip = FRAME_SKIP
+	var video_end_buffer = END_BUFFER
+	while recording:
+		game._physics_process(1.0 / 60.0)
+		yield (get_tree(), "idle_frame")
+		yield (VisualServer, "frame_post_draw")
+
+		if video_skip > 0:
+			video_skip -= 1
+		else:
+			_capture_recording_frame()
+
+		if not ReplayManager.playback and game.is_waiting_on_player() and not game.game_finished:
+			break
+		if game.game_finished:
+			if video_end_buffer > 0:
+				video_end_buffer -= 1
+			else:
+				break
+
+	# Restore game
+	game.set_physics_process(true)
+	var frames_length = recording_frames.size()
+	var audio_muted = options.get_option("mute_audio")
+	print("YOMIRecord: Recorded %d frames." % frames_length)
+
+	# Record audio
+	if not audio_muted:
+		show_rendering_overlay(frames_length, true)
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), default_recording_bus_volume)
+
+		reset_state = _reset_stable_playback(false)
+		if reset_state is GDScriptFunctionState:
+			yield (reset_state, "completed")
+
+		for _frame in range(FRAME_SKIP):
+			yield (get_tree(), "physics_frame")
+			yield (get_tree(), "idle_frame")
+
+		record_effect.set_recording_active(true)
+		var audio_end_buffer = END_BUFFER
+		while true:
+			yield (get_tree(), "physics_frame")
+			yield (get_tree(), "idle_frame")
+			if not ReplayManager.playback and Global.current_game.is_waiting_on_player() and not Global.current_game.game_finished:
+				break
+			if Global.current_game.game_finished:
+				if audio_end_buffer > 0:
+					audio_end_buffer -= 1
+				else:
+					break
+		record_effect.set_recording_active(false)
+
+	# post record (this also waits for the worker thread)
+	var post_state = post_recording()
+	if post_state is GDScriptFunctionState:
+		yield (post_state, "completed")
 
 func post_recording():
 	recording = false
 	emit_signal("recording_ending")
 	var local_path = "user://yomirecord/_recording_%d" % recording_id
+	var audio_muted = options.get_option("mute_audio")
 	
 	# Show Layers
 	var hudlayer = get_tree().get_root().get_node("Main/HudLayer/HudLayer")
@@ -323,31 +459,27 @@ func post_recording():
 	if not Network.multiplayer_active: Global.show_playback_controls = recording_show_playback_controls
 
 	# Save Audio Recording
-	record_effect.set_recording_active(false)
-	var recording_stream = record_effect.get_recording()
-	recording_stream.save_to_wav("%s/audio.wav" % local_path)
+	if not audio_muted:
+		record_effect.set_recording_active(false)
+		var recording_stream = record_effect.get_recording()
+		recording_stream.save_to_wav("%s/audio.wav" % local_path)
 
-	print("YOMIRecord: Writing frames...")
+	print("YOMIRecord: Writing frames to %s ..." % local_path)
 	OS.set_window_title("Your Only Move Is HUSTLE (Rendering)")
 	change_window_icon("rendering")
-	set_rendering_overlay(true, frames_length)
+	show_rendering_overlay(frames_length)
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
 	var start_time = Time.get_ticks_msec()
-	Global.frame_advance = true
-#	var pause_btwn = options.get_option("pause_between_frames")
-#	for frame_num in frames_length:
-#		var frame: Image = recording_frames[frame_num]
-#		frame.save_png("%s/%d.png" % [local_path, frame_num])
-#		if pause_btwn: yield (get_tree(), "idle_frame")
-#	recording_frames.clear()
-	thread_counter_final = frames_length
-	writer_thread_semaphore.post()
-	writer_thread.wait_to_finish()
+	Global.frame_advance = false
+
+	# Wait for frames to write
+	var writer_state = _finish_writer(frames_length)
+	if writer_state is GDScriptFunctionState:
+		yield (writer_state, "completed")
 	recording_frames.clear()
 	thread_counter_current = 0
 	thread_counter_final = 0
-	Global.frame_advance = false
 
 	var dir = Directory.new()
 	if not dir.dir_exists("user://recordings"):
@@ -357,7 +489,6 @@ func post_recording():
 	var global_path = ProjectSettings.globalize_path(local_path)
 	var usernames = get_player_names()
 	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1]))
-	var audio_muted = options.get_option("mute_audio")
 
 	# Apply Resolution
 	var resolution = int(options.get_option("resolution"))
@@ -400,9 +531,8 @@ func post_recording():
 			])
 	
 	# Change Video Speed
-	var native_speed = get_native_speed()
 	var framerate = 60
-	if get_native_speed()  == null:
+	if get_native_speed() == null:
 		framerate = int(float(60) * options.get_option("speed"))
 		if framerate <= 0: framerate = 1
 		# https://superuser.com/a/1667260
@@ -411,16 +541,22 @@ func post_recording():
 				"-af", "asetrate=44100*%s,aresample=44100" % str(float(framerate) / 60)
 			])
 
-	if audio_muted: ffmpegExtraArgs.append("-an")
-
 	# Run FFmpeg
 	var final_path = ProjectSettings.globalize_path("user://recordings/" + video_name)
 	var ffmpegArgs = PoolStringArray([
 		"-framerate", str(framerate),
-		"-i", "%s/%%d.png" % global_path,
-		"-i", "%s/audio.wav" % global_path,
-		"-map", "0:v",
-		"-map", "1:a",
+		"-i", "%s/%%d.png" % global_path
+	]);
+	if audio_muted:
+		ffmpegArgs.append_array(["-map", "0:v"])
+	else:
+		ffmpegArgs.append_array([
+			"-i", "%s/audio.wav" % global_path,
+			"-map", "0:v",
+			"-map", "1:a",
+			"-shortest"
+		])
+	ffmpegArgs.append_array([
 #		"-crf", "17", # 17-37 (37 is worst)
 		"-pix_fmt", "yuv420p",
 		"-vf", "vflip",
@@ -432,8 +568,14 @@ func post_recording():
 	print(ffmpegArgs)
 	var ffmpegCommand = PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" ");
 	print("YOMIRecord: running command: %s " % ffmpegCommand, PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" "))
-	var output = []
-	var exit_code = OS.execute(ffmpeg.ffmpeg_path, ffmpegArgs + ffmpegExtraArgs + PoolStringArray([final_path]), true, output, true, options.get_option("exec_console"))
+	var ffmpeg_thread = Thread.new()
+	var ffmpeg_data = [ffmpeg.ffmpeg_path, ffmpegArgs + ffmpegExtraArgs + PoolStringArray([final_path]), options.get_option("exec_console")]
+	ffmpeg_thread.start(self, "_run_ffmpeg", ffmpeg_data)
+	while ffmpeg_thread.is_alive():
+		yield (get_tree(), "idle_frame")
+	var ffmpeg_result = ffmpeg_thread.wait_to_finish()
+	var exit_code = ffmpeg_result[0]
+	var output = ffmpeg_result[1]
 	print("YOMIRecord: ", output[0])
 	print("YOMIRecord: Finished rendering with exit code %d" % exit_code)
 
@@ -453,14 +595,14 @@ func post_recording():
 		dir.remove(local_path)
 	
 	# Variable Cleanup
-	recording_frame_skip = 10
-	recording_end_buffer = 115
+	recording_frame_skip = FRAME_SKIP
+	recording_end_buffer = END_BUFFER
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), recording_bus_volume)
 	
 	# Update playback controls slider
 	var playback_controls = get_tree().get_root().get_node("Main/UILayer/ReplayControls")
 	var playback_hslider: HSlider = get_tree().get_root().get_node("Main/UILayer/ReplayControls/VBoxContainer/Contents/VBoxContainer/PlaybackSpeed")
-	playback_hslider.value = 2
+	playback_hslider.value = 3 if Global.has_method("get_playback_speed_factor") else 2
 
 	OS.set_window_title("Your Only Move Is HUSTLE")
 	change_window_icon("normal")
@@ -468,7 +610,9 @@ func post_recording():
 	print("YOMIRecord: Cleanup finished, output file in ", final_path)
 
 	hudlayer.visible = true
-	set_rendering_overlay(false)
+	hide_rendering_overlay()
+	stable_recording = false
+	writer_finished = false
 	emit_signal("recording_ended")
 	if exit_code == 0: spawn_file_toast("recording", video_name, time_elapsed, frames_length)
 
@@ -482,8 +626,12 @@ func record():
 		if ReplayManager.frames[1].size() == 0 or ReplayManager.frames[2].size() == 0:
 			spawn_text_toast("[color=#ff0000]Error![/color] There aren't any frames to record!", true)
 			return false
-		pre_recording()
 		recording = true
+		if options.get_option("stable_mode"):
+			stable_recording = true
+			stable_recording_state = stable_record()
+		else:
+			pre_recording()
 		return true
 	return false
 
@@ -496,9 +644,11 @@ func _thread_write(local_path):
 		frame.save_png("%s/%d.png" % [local_path, thread_counter_current])
 		recording_frames[thread_counter_current] = null
 		thread_counter_current += 1
+		if thread_counter_current % 60 == 0:
+			print("YOMIRecord: Render thread progress %d/%d" % [thread_counter_current, thread_counter_final])
 
 func _physics_process(delta):
-	if not recording: return
+	if not recording or stable_recording: return
 
 	# Skip leading frames, seems to solve the offset issue and frames bleeding into the editor
 	if recording_frame_skip > 0:
@@ -510,14 +660,7 @@ func _physics_process(delta):
 		return post_recording()
 
 	# Snapshot and Store Image
-	var viewport: Viewport = get_game_viewport()
-	viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
-	var image = viewport.get_texture().get_data()
-#	image.flip_y()
-
-	# Save Frame
-	recording_frames.append(image)
-	writer_thread_semaphore.post()
+	_capture_recording_frame()
 
 	# Pad ending frames, to show player win UI
 	if Global.current_game.game_finished:

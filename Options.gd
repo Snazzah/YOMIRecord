@@ -11,6 +11,7 @@ var default_options = {
 	"recording_format": "mp4",
 	"speed": 1.0,
 	"native_speed": true,
+	"stable_mode": false,
 	"volume": 100,
 	"normalize_audio": false,
 	"mute_audio": false,
