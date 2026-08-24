@@ -7,7 +7,6 @@ signal recording_ended()
 
 const FRAME_SKIP = 10
 const END_BUFFER = 115
-const RENDER_PROGRESS_INTERVAL = 60
 
 var recording = false
 var rendering = false
@@ -392,12 +391,13 @@ func _finish_writer(frames_length: int):
 	var last_progress_update = thread_counter_current
 	while writer_thread.is_alive():
 		yield (get_tree(), "idle_frame")
-		if thread_counter_current - last_progress_update >= RENDER_PROGRESS_INTERVAL:
+		if thread_counter_current - last_progress_update != 0:
 			last_progress_update = thread_counter_current
 			update_rendering_toast("Wrote [color=#fff]%d/%d frames[/color]" % [thread_counter_current, frames_length])
-	print("YOMIRecord: Render thread inactive")
+			if thread_counter_current % 10 == 0:
+				print("YOMIRecord: Render thread progress %d/%d" % [thread_counter_current, thread_counter_final])
+	print("YOMIRecord: Render thread stopped")
 	writer_thread.wait_to_finish()
-	update_rendering_toast("All frames written...")
 	print("YOMIRecord: Render thread finished")
 	writer_finished = true
 
@@ -485,6 +485,11 @@ func post_recording():
 	emit_signal("recording_ending")
 	var local_path = "user://yomirecord/_recording_%d" % recording_id
 	var audio_muted = options.get_option("mute_audio")
+
+	# Get the usernames so the player can go elsewhere
+	var global_path = ProjectSettings.globalize_path(local_path)
+	var usernames = get_player_names()
+	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1]))
 	
 	# Show Layers
 	var frames_length = recording_frames.size()
@@ -525,11 +530,6 @@ func post_recording():
 	var dir = Directory.new()
 	if not dir.dir_exists("user://recordings"):
 		dir.make_dir("user://recordings")
-
-	print("YOMIRecord: Rendering...")
-	var global_path = ProjectSettings.globalize_path(local_path)
-	var usernames = get_player_names()
-	var video_name = Utils.filter_filename(ReplayManager.generate_mp_replay_name(usernames[0], usernames[1]))
 
 	# Apply Resolution
 	var resolution = int(options.get_option("resolution"))
@@ -682,8 +682,6 @@ func _thread_write(local_path):
 		frame.save_png("%s/%d.png" % [local_path, thread_counter_current])
 		recording_frames[thread_counter_current] = null
 		thread_counter_current += 1
-		if thread_counter_current % 60 == 0:
-			print("YOMIRecord: Render thread progress %d/%d" % [thread_counter_current, thread_counter_final])
 
 func _physics_process(delta):
 	if not recording or stable_recording: return
