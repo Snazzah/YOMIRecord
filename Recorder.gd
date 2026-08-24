@@ -7,8 +7,10 @@ signal recording_ended()
 
 const FRAME_SKIP = 10
 const END_BUFFER = 115
+const RENDER_PROGRESS_INTERVAL = 60
 
 var recording = false
+var rendering = false
 var record_effect: AudioEffectRecord
 var recording_id = -1
 var recording_bus_volume = 0
@@ -24,6 +26,7 @@ var thread_counter_current:int = 0
 var thread_counter_final:int = 0
 var writer_thread:Thread
 var writer_thread_semaphore:Semaphore = Semaphore.new()
+var rendering_toast = null
 
 var default_recording_bus_volume = -0.130497
 
@@ -204,7 +207,7 @@ func get_native_speed():
 	return null
 
 func spawn_file_toast(type, file_name: String, time_elapsed_msec = -1, frames_taken = -1):
-	var toast_container = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/Toasts/ToastContainer")
+	var toast_container = get_yomirecord_layer().get_node("Overlay/Toasts/ToastContainer")
 	var toast = load("res://YOMIRecord/ui/overlay/FileToast.tscn").instance()
 	toast_container.add_child(toast)
 	toast.file_path = "user://%ss/%s" % [type, file_name]
@@ -224,32 +227,44 @@ func spawn_file_toast(type, file_name: String, time_elapsed_msec = -1, frames_ta
 	toast.pop()
 
 func spawn_text_toast(text, alert = false):
-	var toast_container = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/Toasts/ToastContainer")
+	var toast_container = get_yomirecord_layer().get_node("Overlay/Toasts/ToastContainer")
 	var toast = load("res://YOMIRecord/ui/overlay/TextToast.tscn").instance()
 	toast_container.add_child(toast)
 	toast.set_text(text)
 	toast.pop(alert)
 
-func show_rendering_overlay(frames: int, recording_audio = false):
+func show_rendering_toast():
 	set_yomirecord_overlay_visible(true)
-	var overlay: MarginContainer = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/RenderingOverlay")
-	var detail
-	if recording_audio:
-		detail = "Recording audio for %d frames..." % frames
-	else:
-		var eta = float(frames) / 90
-		var eta2 = float(frames) / 50
-		detail = "Rendering %d frames... ETA: %.2f-%.2f seconds" % [frames, eta, eta2]
-	overlay.get_node("HContainer/Detail").text = detail
+	var toast_container = get_yomirecord_layer().get_node("Overlay/Toasts/ToastContainer")
+	rendering_toast = load("res://YOMIRecord/ui/overlay/RenderingToast.tscn").instance()
+	toast_container.add_child(rendering_toast)
+	rendering_toast.show()
+
+func update_rendering_toast(text: String):
+	if is_instance_valid(rendering_toast):
+		rendering_toast.get_node("HBoxContainer/Label").bbcode_text = text
+
+func hide_rendering_toast():
+	if is_instance_valid(rendering_toast):
+		rendering_toast.queue_free()
+	rendering_toast = null
+
+func show_audio_recording_overlay(frames: int):
+	set_yomirecord_overlay_visible(true)
+	var overlay: MarginContainer = get_yomirecord_layer().get_node("Overlay/RenderingOverlay")
+	overlay.get_node("HContainer/Detail").text = "Recording audio for %d frames..." % frames
 	overlay.get_node("HContainer/FrameWarn").visible = false
 	overlay.visible = true
 
 func hide_rendering_overlay():
-	var overlay: MarginContainer = get_tree().get_root().get_node("Main/YOMIRecordLayer/Overlay/RenderingOverlay")
+	var overlay: MarginContainer = get_yomirecord_layer().get_node("Overlay/RenderingOverlay")
 	overlay.visible = false
 
+func get_yomirecord_layer():
+	return get_tree().get_root().get_node("ModLoader/YOMIRecord/YOMIRecordLayer")
+
 func set_yomirecord_overlay_visible(visible = true):
-	var layer: CanvasLayer = get_tree().get_root().get_node("Main/YOMIRecordLayer")
+	var layer: CanvasLayer = get_yomirecord_layer()
 	layer.visible = visible
 
 func change_window_icon(icon: String):
@@ -359,10 +374,16 @@ func _finish_writer(frames_length: int):
 	thread_counter_final = frames_length
 	writer_thread_semaphore.post()
 	print("YOMIRecord: Render thread signalled to finish at frame %d (of %d)" % [thread_counter_current, frames_length])
+	update_rendering_toast("Wrote [color=#fff]%d/%d frames[/color]" % [thread_counter_current, frames_length])
+	var last_progress_update = thread_counter_current
 	while writer_thread.is_alive():
 		yield (get_tree(), "idle_frame")
+		if thread_counter_current - last_progress_update >= RENDER_PROGRESS_INTERVAL:
+			last_progress_update = thread_counter_current
+			update_rendering_toast("Wrote [color=#fff]%d/%d frames[/color]" % [thread_counter_current, frames_length])
 	print("YOMIRecord: Render thread inactive")
 	writer_thread.wait_to_finish()
+	update_rendering_toast("All frames written...")
 	print("YOMIRecord: Render thread finished")
 	writer_finished = true
 
@@ -415,7 +436,7 @@ func stable_record():
 
 	# Record audio
 	if not audio_muted:
-		show_rendering_overlay(frames_length, true)
+		show_audio_recording_overlay(frames_length)
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), default_recording_bus_volume)
 
 		reset_state = _reset_stable_playback(false)
@@ -447,16 +468,23 @@ func stable_record():
 
 func post_recording():
 	recording = false
+	rendering = true
 	emit_signal("recording_ending")
 	var local_path = "user://yomirecord/_recording_%d" % recording_id
 	var audio_muted = options.get_option("mute_audio")
 	
 	# Show Layers
-	var hudlayer = get_tree().get_root().get_node("Main/HudLayer/HudLayer")
 	var frames_length = recording_frames.size()
 	set_yomirecord_overlay_visible(true)
 	set_ui_visibility(true)
+	hide_rendering_overlay()
 	if not Network.multiplayer_active: Global.show_playback_controls = recording_show_playback_controls
+
+	# Update playback controls slider
+	var main = get_tree().get_root().get_node("Main")
+	var playback_hslider: HSlider = main.get_node("UILayer/ReplayControls/VBoxContainer/Contents/VBoxContainer/PlaybackSpeed")
+	playback_hslider.value = 3 if Global.has_method("get_playback_speed_factor") else 2
+	main.get_node("HudLayer/HudLayer").visible = true
 
 	# Save Audio Recording
 	if not audio_muted:
@@ -467,7 +495,7 @@ func post_recording():
 	print("YOMIRecord: Writing frames to %s ..." % local_path)
 	OS.set_window_title("Your Only Move Is HUSTLE (Rendering)")
 	change_window_icon("rendering")
-	show_rendering_overlay(frames_length)
+	show_rendering_toast()
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
 	var start_time = Time.get_ticks_msec()
@@ -570,6 +598,7 @@ func post_recording():
 	print("YOMIRecord: running command: %s " % ffmpegCommand, PoolStringArray([ffmpegArgs.join(" "), ffmpegExtraArgs.join(" "), '"%s"' % final_path]).join(" "))
 	var ffmpeg_thread = Thread.new()
 	var ffmpeg_data = [ffmpeg.ffmpeg_path, ffmpegArgs + ffmpegExtraArgs + PoolStringArray([final_path]), options.get_option("exec_console")]
+	update_rendering_toast("[color=#fff]FFmpeg is running...[/color]")
 	ffmpeg_thread.start(self, "_run_ffmpeg", ffmpeg_data)
 	while ffmpeg_thread.is_alive():
 		yield (get_tree(), "idle_frame")
@@ -578,6 +607,7 @@ func post_recording():
 	var output = ffmpeg_result[1]
 	print("YOMIRecord: ", output[0])
 	print("YOMIRecord: Finished rendering with exit code %d" % exit_code)
+	hide_rendering_toast()
 
 	if exit_code != 0:
 		spawn_text_toast("[color=#ff0000]Error![/color] FFmpeg failed to render that capture, Check with your settings or try again later!", true)
@@ -599,25 +629,19 @@ func post_recording():
 	recording_end_buffer = END_BUFFER
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), recording_bus_volume)
 	
-	# Update playback controls slider
-	var playback_controls = get_tree().get_root().get_node("Main/UILayer/ReplayControls")
-	var playback_hslider: HSlider = get_tree().get_root().get_node("Main/UILayer/ReplayControls/VBoxContainer/Contents/VBoxContainer/PlaybackSpeed")
-	playback_hslider.value = 3 if Global.has_method("get_playback_speed_factor") else 2
-
 	OS.set_window_title("Your Only Move Is HUSTLE")
 	change_window_icon("normal")
 	OS.request_attention()
 	print("YOMIRecord: Cleanup finished, output file in ", final_path)
 
-	hudlayer.visible = true
-	hide_rendering_overlay()
 	stable_recording = false
 	writer_finished = false
+	rendering = false
 	emit_signal("recording_ended")
 	if exit_code == 0: spawn_file_toast("recording", video_name, time_elapsed, frames_length)
 
 func record():
-	if recording: return false
+	if recording or rendering: return false
 
 	if is_instance_valid(Global.current_game):
 		if Network.multiplayer_active:

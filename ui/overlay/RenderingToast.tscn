@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://YOMIRecord/ui/overlay/rendering.png" type="Texture" id=7]
+
+[node name="RenderingToast" type="PanelContainer"]
+margin_top = 284.0
+margin_right = 524.0
+margin_bottom = 318.0
+rect_pivot_offset = Vector2( -350, -99 )
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 517.0
+margin_bottom = 27.0
+mouse_filter = 2
+
+[node name="Control" type="Control" parent="HBoxContainer"]
+margin_right = 80.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 80, 0 )
+mouse_filter = 2
+
+[node name="Rendering" type="TextureRect" parent="HBoxContainer/Control"]
+margin_left = -2.0
+margin_top = -10.0
+margin_right = 78.0
+margin_bottom = 20.0
+mouse_filter = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource( 7 )
+expand = true
+stretch_mode = 5
+
+[node name="Label" type="RichTextLabel" parent="HBoxContainer"]
+unique_name_in_owner = true
+margin_left = 84.0
+margin_right = 510.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 12 )
+mouse_filter = 2
+size_flags_horizontal = 3
+custom_colors/default_color = Color( 0.666667, 0.666667, 0.666667, 1 )
+bbcode_enabled = true
+bbcode_text = "Wrote [color=#fff]0/0 frames[/color]"
+text = "Wrote 0/0 frames"

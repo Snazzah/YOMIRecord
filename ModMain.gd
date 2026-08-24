@@ -14,6 +14,8 @@ func _init(modLoader = ModLoader):
 	add_child(ffmpeg)
 	recorder = load("res://YOMIRecord/Recorder.gd").new()
 	add_child(recorder)
+	var overlay = load("res://YOMIRecord/ui/overlay/OverlayLayer.tscn").instance()
+	add_child(overlay)
 
 	modLoader.installScriptExtension("res://YOMIRecord/MLMainHook.gd")
 	var file = File.new()

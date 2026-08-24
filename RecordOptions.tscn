@@ -541,10 +541,7 @@ margin_top = 529.0
 margin_right = 236.0
 margin_bottom = 541.0
 rect_pivot_offset = Vector2( -430, 13 )
-hint_tooltip = "Skips a cleanup step where temporary PNG frames
-and WAV audio so you can use that for whenever.
-
-(Temp folders are in  [screenshots_folder]/../yomirecord)"
+hint_tooltip = "Shows the console when launching FFmpeg."
 text = "Show Execute Console"
 
 [node name="PauseBetweenFramesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]

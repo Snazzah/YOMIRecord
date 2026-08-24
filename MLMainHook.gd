@@ -23,13 +23,8 @@ func _yomirecord_add_to_main():
 	# Record Options
 	ModLoader.appendNodeInScene(main, "YOMIRecordOptionsWindow", "UILayer", "res://YOMIRecord/RecordOptions.tscn")
 	
-	# Overlay Layer
-	var overlay = load("res://YOMIRecord/ui/overlay/OverlayLayer.tscn").instance()
-	var uilayer = main.get_node("UILayer")
-	main.add_child(overlay)
-	overlay.set_owner(main)
-
 	# Pause Buttons
+	var uilayer = main.get_node("UILayer")
 	var yomirecord_pause_btns = load("res://YOMIRecord/ui/ExtraPauseButtons.tscn").instance()
 	var pause_buttons: VBoxContainer = uilayer.get_node("GameUI/PausePanel/VBoxContainer")
 	var save_replay_btn = pause_buttons.get_node("SaveReplayButton")

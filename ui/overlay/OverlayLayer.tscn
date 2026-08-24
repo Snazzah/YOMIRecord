@@ -113,22 +113,14 @@ bbcode_text = "
 
 
 
-[center]Your recording is now being rendered with FFmpeg.
-[color=#3498db]Be patient![/color] This will take time and [u]the game may temporarily stop responding for a bit.[/u]
-
-Renders usually go for around 20-30 frames per second. (Check the ETA below)
-In the meantime,[color=#ddd] don't mess with the game please.[/color][/center]
+[center]Your Only Move Is Record is capturing the replay audio. Please wait.[/center]
 "
 meta_underlined = false
 text = "
 
 
 
-Your recording is now being rendered with FFmpeg.
-Be patient! This will take time and the game may temporarily stop responding for a bit.
-
-Renders usually go for around 20-30 frames per second. (Check the ETA below)
-In the meantime, don't mess with the game please.
+Your Only Move Is Record is capturing the replay audio. Please wait.
 "
 fit_content_height = true
 scroll_active = false
