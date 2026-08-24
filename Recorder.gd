@@ -12,6 +12,7 @@ const RENDER_PROGRESS_INTERVAL = 60
 var recording = false
 var rendering = false
 var record_effect: AudioEffectRecord
+var record_effect_bus_index = -1
 var recording_id = -1
 var recording_bus_volume = 0
 var recording_frame_skip = FRAME_SKIP
@@ -291,6 +292,22 @@ func options_menu_visible():
 	var option_menu: PanelContainer = get_tree().get_root().get_node("Main/UILayer/YOMIRecordOptionsWindow")
 	return option_menu.visible
 
+func _add_record_effect():
+	var bus_name = "Fx" if options.get_option("record_fx_only") else "Master"
+	record_effect_bus_index = AudioServer.get_bus_index(bus_name)
+	record_effect = AudioEffectRecord.new()
+	AudioServer.add_bus_effect(record_effect_bus_index, record_effect)
+	print("YOMIRecord: Recording audio from the %s bus" % bus_name)
+
+func _remove_record_effect():
+	if record_effect == null or record_effect_bus_index < 0: return
+	for effect_index in range(AudioServer.get_bus_effect_count(record_effect_bus_index)):
+		if AudioServer.get_bus_effect(record_effect_bus_index, effect_index) == record_effect:
+			AudioServer.remove_bus_effect(record_effect_bus_index, effect_index)
+			break
+	record_effect = null
+	record_effect_bus_index = -1
+
 func _begin_recording():
 	emit_signal("recording_starting")
 
@@ -306,11 +323,8 @@ func _begin_recording():
 
 	# Handle Audio and Record Audio Effect
 	recording_bus_volume = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Fx"))
-	if not options.get_option("mute_audio") and typeof(record_effect) == 0:
-		var idx = AudioServer.get_bus_index("Fx")
-		record_effect = AudioEffectRecord.new()
-		print("YOMIRecord: Created record audio effect")
-		AudioServer.add_bus_effect(idx, record_effect)
+	if not options.get_option("mute_audio"):
+		_add_record_effect()
 
 	# Prepare Directory
 	recording_id = randi() % 10000000
@@ -397,7 +411,6 @@ func stable_record():
 	var begin_state = _begin_recording()
 	if begin_state is GDScriptFunctionState:
 		yield (begin_state, "completed")
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), -80)
 	emit_signal("recording_started")
 
 	# Setup the game
@@ -628,6 +641,7 @@ func post_recording():
 	recording_frame_skip = FRAME_SKIP
 	recording_end_buffer = END_BUFFER
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Fx"), recording_bus_volume)
+	_remove_record_effect()
 	
 	OS.set_window_title("Your Only Move Is HUSTLE")
 	change_window_icon("normal")

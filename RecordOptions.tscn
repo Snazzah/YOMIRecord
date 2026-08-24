@@ -82,7 +82,7 @@ scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer"]
 margin_right = 236.0
-margin_bottom = 567.0
+margin_bottom = 580.0
 size_flags_horizontal = 3
 
 [node name="Spacer4" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
@@ -476,27 +476,37 @@ hint_tooltip = "Normalizes the audio uses
 FFmpeg's \"Dynaudnorm\" audio filter."
 text = "Normalize Audio"
 
-[node name="MuteAudioToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="RecordFxOnlyToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
 margin_top = 425.0
 margin_right = 236.0
 margin_bottom = 437.0
 rect_pivot_offset = Vector2( -430, 13 )
+hint_tooltip = "Records only audio played through the \"Fx\" bus.
+Audio that other mods send through different buses may be left out."
+text = "Record SFX Only"
+
+[node name="MuteAudioToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 438.0
+margin_right = 236.0
+margin_bottom = 450.0
+rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Removes audio, if you didn't like the cool sound effects."
 text = "Remove Audio"
 
 [node name="Label4" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 438.0
+margin_top = 451.0
 margin_right = 236.0
-margin_bottom = 463.0
+margin_bottom = 476.0
 text = "
 Third-party"
 
 [node name="DRPToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 464.0
+margin_top = 477.0
 margin_right = 236.0
-margin_bottom = 476.0
+margin_bottom = 489.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Shows \"Recording a replay\" in your
 Discord Rich Presence while recording."
@@ -504,9 +514,9 @@ text = "Use Discord Rich Presence"
 
 [node name="DRPRequireLabel" type="RichTextLabel" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 477.0
+margin_top = 490.0
 margin_right = 236.0
-margin_bottom = 489.0
+margin_bottom = 502.0
 size_flags_vertical = 4
 custom_colors/default_color = Color( 0.666667, 0.666667, 0.666667, 1 )
 custom_fonts/mono_font = ExtResource( 6 )
@@ -517,17 +527,17 @@ fit_content_height = true
 scroll_active = false
 
 [node name="Label5" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 490.0
+margin_top = 503.0
 margin_right = 236.0
-margin_bottom = 515.0
+margin_bottom = 528.0
 text = "
 Advanced"
 
 [node name="SkipFilesToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 516.0
+margin_top = 529.0
 margin_right = 236.0
-margin_bottom = 528.0
+margin_bottom = 541.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Skips a cleanup step where temporary PNG frames
 and WAV audio are deleted so you can use that for whatever.
@@ -537,9 +547,9 @@ text = "Skip File Cleanup"
 
 [node name="ExecWindowToggle" type="CheckButton" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
-margin_top = 529.0
+margin_top = 542.0
 margin_right = 236.0
-margin_bottom = 541.0
+margin_bottom = 554.0
 rect_pivot_offset = Vector2( -430, 13 )
 hint_tooltip = "Shows the console when launching FFmpeg."
 text = "Show Execute Console"
@@ -559,9 +569,9 @@ but useful if your system locks up easily."
 text = "Pause Between Writing Frames"
 
 [node name="EndLabel" type="Label" parent="VBoxContainer/Contents/VBoxContainer/ScrollContainer/VBoxContainer"]
-margin_top = 542.0
+margin_top = 555.0
 margin_right = 236.0
-margin_bottom = 567.0
+margin_bottom = 580.0
 custom_colors/font_color = Color( 0.133333, 0.133333, 0.133333, 1 )
 text = "
 -- end of list --"

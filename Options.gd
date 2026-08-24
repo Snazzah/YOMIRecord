@@ -14,6 +14,7 @@ var default_options = {
 	"stable_mode": false,
 	"volume": 100,
 	"normalize_audio": false,
+	"record_fx_only": false,
 	"mute_audio": false,
 	"skip_files": false,
 	"exec_console": false,
