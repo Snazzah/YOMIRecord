@@ -421,17 +421,13 @@ func stable_record():
 	var game = Global.current_game
 
 	# Frame by frame recording
-	var video_skip = FRAME_SKIP
 	var video_end_buffer = END_BUFFER
 	while recording:
 		game._physics_process(1.0 / 60.0)
 		yield (get_tree(), "idle_frame")
 		yield (VisualServer, "frame_post_draw")
 
-		if video_skip > 0:
-			video_skip -= 1
-		else:
-			_capture_recording_frame()
+		_capture_recording_frame()
 
 		if not ReplayManager.playback and game.is_waiting_on_player() and not game.game_finished:
 			break
@@ -455,10 +451,6 @@ func stable_record():
 		reset_state = _reset_stable_playback(false)
 		if reset_state is GDScriptFunctionState:
 			yield (reset_state, "completed")
-
-		for _frame in range(FRAME_SKIP):
-			yield (get_tree(), "physics_frame")
-			yield (get_tree(), "idle_frame")
 
 		record_effect.set_recording_active(true)
 		var audio_end_buffer = END_BUFFER
